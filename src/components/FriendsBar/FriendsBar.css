@@ -1,0 +1,13 @@
+.FriendsWrapper {
+    width: 275px;
+    height: 100vh;
+    background-color: #2f3136;
+}
+
+.FriendsFlexContainer {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+}
