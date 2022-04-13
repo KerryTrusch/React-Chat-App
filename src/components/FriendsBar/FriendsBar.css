@@ -1,7 +1,7 @@
 .FriendsWrapper {
-    width: 275px;
     height: 100vh;
     background-color: #2f3136;
+    flex: 0 0 240px;
 }
 
 .FriendsFlexContainer {
@@ -10,4 +10,13 @@
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 10px;
+}
+
+.BorderUnderSearch {
+    display:block;
+    position: relative;
+    margin: 10px -10px 0 -10px;
+    width: 109%;
+    height: 1px;
+    background-color: #202225;
 }

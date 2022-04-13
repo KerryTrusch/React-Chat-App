@@ -1,21 +1,18 @@
 .FriendsSearchWrapper {
-    margin-left: -10px;
-    margin-right: -10px;
-    padding-left: 10px;
-    padding-right: 15px;
-    border-bottom: 1px solid #202225;
+    
 }
 
 input.FriendsSearch {
+    display: block;
+    margin: auto;
     background-color: #202225;
-    margin-bottom: 10px;
     border-bottom: none;
     border-right: none;
-    width: 100%;
     padding-bottom: 5px;
     padding-top: 3px;
     padding-left: 5px;
     border-radius: 3px;
+    width: 95%;
     color: white;
 }
 

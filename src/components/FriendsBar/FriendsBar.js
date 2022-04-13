@@ -5,6 +5,7 @@ function FriendsBar() {
         <div className="FriendsWrapper">
             <div className="FriendsFlexContainer">
                 <FriendsSearchBar />
+                <div className="BorderUnderSearch" />
             </div>
         </div>
     )
