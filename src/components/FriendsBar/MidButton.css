@@ -1,4 +1,50 @@
 .MidButtonWrapper {
+    display:block;
+    margin:auto;
+    background-color: #2f3136;
+    width: 95%;
+}
+
+.MidButtonContainer {
     display: flex;
-    
+    padding: 0 8px;
+    height: 42px;
+    border-radius: 2px;
+    border:none;
+    background-color: #2f3136;
+    width:100%;
+    align-items: center;
+    text-decoration: none;
+}
+
+.MidButtonContainer:hover {
+    background-color: #42464d;
+}
+
+.MidButtonContainer:active {
+    background-color: #42464d;
+}
+
+.MidButtonSVG {
+    display: flex;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
+    color: #96989d;
+    align-items: center;
+}
+
+.MidButtonSpan {
+    color:#96989d;
+    font-size: 16px;
+    flex: 0 1 auto;
+    line-height: 20px;
+    font-weight: 500;
+}
+
+.MidButtonSpanWrapper {
+    text-align: left;
+    flex: 1 1 auto;
+    min-width: 0;
 }

@@ -1,22 +1,68 @@
 .FriendsWrapper {
-    height: 100vh;
+    min-height: 0;
+    width: 240px;
     background-color: #2f3136;
-    flex: 0 0 240px;
+    flex: 0 0 auto;
 }
 
 .FriendsFlexContainer {
-    display: flex;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 0;
+    height: 100%;
+    -webkit-box-flex: 1;
+    flex: 1 1 auto;
+}
+
+.ulForFriends {
+    position:relative;
+    height: 100vh;
+    padding-inline-start: 0;
+}
+
+
+.liForFriends {
+    position: relative;
+    max-width: 224px;
+    box-sizing: border-box;
+    display:block;
+    padding: 1px 0;
+    border-radius: 4px;
+    transition: none;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.InnerLiFriend {
+    display:flex;
     flex-direction: column;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 8px;
+    width:100%;
+    box-sizing: border-box;
+    align-items: center;
 }
 
 .BorderUnderSearch {
-    display:block;
-    position: relative;
-    margin: 10px -10px 0 -10px;
-    width: 109%;
+    position:relative;
+    width: 107%;
+    left:-7px;
     height: 1px;
+    top: -14px;
     background-color: #202225;
+}
+
+.DirectMessages {
+    width: 100%;
+    padding-top:15px;
+    padding-left:15px;
+    text-align: left;
+    background-color: #2f3136;
+    border: none;
+    color: #96989d;
+}
+
+.DirectMessages:hover {
+    color: rgba(255, 255, 255, 1);
 }

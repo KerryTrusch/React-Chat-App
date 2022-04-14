@@ -1,6 +1,8 @@
 function FriendsButton() {
     return (
-        <div></div>
+        <div>
+            
+        </div>
     )
 }
 

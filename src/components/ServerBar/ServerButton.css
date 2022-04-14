@@ -1,5 +1,7 @@
 .serverButton {
-    height: 25px;
-    width: 25px;
+    height: 36px;
+    width: 36px;
     border-radius: 9999px;
+    display:block;
+    object-fit: cover;
 }

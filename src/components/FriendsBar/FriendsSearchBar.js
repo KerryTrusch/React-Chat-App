@@ -3,7 +3,7 @@ import "./FriendsSearchBar.css";
 function FriendsSearchBar() {
     return (
         <div className="FriendsSearchWrapper">
-            <input className="FriendsSearch" placeholder="Find a conversation" />
+            <button type="button" className="FriendsSearch">Find or start a conversation</button>
         </div>
     )
 }
