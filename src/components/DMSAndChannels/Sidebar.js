@@ -1,8 +1,9 @@
-import "./FriendsBar.css";
-import FriendsSearchBar from "./FriendsSearchBar";
-import MidButton from "./MidButton";
-import FriendsButton from "./FriendsButton";
+import "./Sidebar.css";
+import FriendsSearchBar from "./DMS/FriendsSearchBar";
+import MidButton from "./DMS/MidButton";
+import FriendsButton from "./DMS/FriendsButton";
 import testData from "./test-DM-data.json";
+import ButtonText from "./ButtonText";
 function FriendsBar() {
     const DMS = testData.map(({name, src}) => {
         return (
@@ -34,7 +35,7 @@ function FriendsBar() {
                     </li>
                     <li className="liForFriends">
                         <div className="InnerLiFriend">
-                            <button className="DirectMessages"><small>DIRECT MESSAGES</small></button>
+                            <ButtonText styling="DirectMessages" text="DIRECT MESSAGES" />
                         </div>
                     </li>
                     { DMS }

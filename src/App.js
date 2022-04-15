@@ -1,26 +1,14 @@
 import logo from './logo.svg';
 import './App.css';
 import Headers from './components/ServerBar/header';
-import FriendsBar from './components/FriendsBar/FriendsBar';
+import Sidebar from './components/DMSAndChannels/Sidebar';
+import ChatArea from './components/ChatArea/ChatArea';
 function App() {
   return (
     <div className="App">
       <Headers />
-      <FriendsBar />
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Sidebar />
+      <ChatArea />
     </div>
   );
 }

@@ -1,0 +1,9 @@
+.ChatWrapper {
+    display:flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;
+    background: #36393f;
+    flex: 1 1 auto;
+}
