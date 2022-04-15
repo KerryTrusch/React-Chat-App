@@ -2,7 +2,18 @@ import "./FriendsBar.css";
 import FriendsSearchBar from "./FriendsSearchBar";
 import MidButton from "./MidButton";
 import FriendsButton from "./FriendsButton";
+import testData from "./test-DM-data.json";
 function FriendsBar() {
+    const DMS = testData.map(({name, src}) => {
+        return (
+            <li className="liForFriends">
+                <div className="InnerLiFriend">
+                    <FriendsButton name={name} src={src} key={src}/>
+                </div>
+            </li>
+        )
+    })
+
     return (
         <div className="FriendsWrapper">
             <FriendsSearchBar />
@@ -26,16 +37,7 @@ function FriendsBar() {
                             <button className="DirectMessages"><small>DIRECT MESSAGES</small></button>
                         </div>
                     </li>
-                    <li className="liForFriends">
-                        <div className="InnerLiFriend">
-                            <FriendsButton name="nyaa" src="eve.PNG" />
-                        </div>
-                    </li>
-                    <li className="liForFriends">
-                        <div className="InnerLiFriend">
-                            <FriendsButton name="nyaa" src="eve.PNG" />
-                        </div>
-                    </li>
+                    { DMS }
                 </ul>
             </nav>
         </div>
