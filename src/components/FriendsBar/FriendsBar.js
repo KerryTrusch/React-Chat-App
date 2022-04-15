@@ -1,6 +1,7 @@
 import "./FriendsBar.css";
 import FriendsSearchBar from "./FriendsSearchBar";
 import MidButton from "./MidButton";
+import FriendsButton from "./FriendsButton";
 function FriendsBar() {
     return (
         <div className="FriendsWrapper">
@@ -23,6 +24,16 @@ function FriendsBar() {
                     <li className="liForFriends">
                         <div className="InnerLiFriend">
                             <button className="DirectMessages"><small>DIRECT MESSAGES</small></button>
+                        </div>
+                    </li>
+                    <li className="liForFriends">
+                        <div className="InnerLiFriend">
+                            <FriendsButton name="nyaa" src="eve.PNG" />
+                        </div>
+                    </li>
+                    <li className="liForFriends">
+                        <div className="InnerLiFriend">
+                            <FriendsButton name="nyaa" src="eve.PNG" />
                         </div>
                     </li>
                 </ul>

@@ -6,7 +6,7 @@ function MidButton(props) {
                 <div className="MidButtonSVG">
                     <svg aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
                         <g fill="none" fillRule="evenodd">
-                            <path fill="currentColor" fillRule="nonzero" d={props.svgLink} transform="translate(2 4)"></path>
+                            <path fill="currentColor" fillRule="nonzero" d={props.svgLink} transform="translate(0 4)"></path>
                         </g>
                     </svg>
                 </div>

@@ -2,17 +2,17 @@
     display:block;
     margin:auto;
     background-color: #2f3136;
-    width: 95%;
+    width: 100%;
 }
 
 .MidButtonContainer {
     display: flex;
+    flex: none;
     padding: 0 8px;
     height: 42px;
     border-radius: 2px;
     border:none;
     background-color: #2f3136;
-    width:100%;
     align-items: center;
     text-decoration: none;
 }

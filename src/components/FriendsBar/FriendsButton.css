@@ -1,4 +1,59 @@
 .DMWrapper {
+    display:block;
+    margin:auto;
+    background-color: #2f3136;
     width: 100%;
-    
+}
+
+.DMContainer {
+    display: flex;
+    flex: none;
+    padding: 0 8px;
+    height: 42px;
+    border-radius: 2px;
+    border:none;
+    background-color: #2f3136;
+    align-items: center;
+    text-decoration: none;
+    margin-bottom: 1px;
+}
+
+.DMContainer:hover {
+    background-color: #42464d;
+}
+
+.DMContainer:active {
+    background-color: #42464d;
+}
+
+
+.DMPFPContainer {
+    height:32px;
+    width:32px;
+    margin-right:12px;
+}
+
+.DMPic {
+    border-radius: 9999px;
+    max-width:32px !important;
+    height:auto;
+}
+
+.DMSpan {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    word-break: break-word;
+    color:#96989d;
+    font-size: 16px;
+    flex: 0 1 auto;
+    line-height: 20px;
+    font-weight: 500;
+    padding-bottom: 5px;
+}
+
+.DMSpanWrapper {
+    text-align: center;
+    flex: 1 1 auto;
+    min-width: 0;
 }
