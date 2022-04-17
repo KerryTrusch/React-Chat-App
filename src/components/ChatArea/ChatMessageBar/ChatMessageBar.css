@@ -1,0 +1,23 @@
+.MessageForm {
+    display: block;
+    padding-left: 16px;
+    padding-right: 16px;
+    flex-shrink: 0;
+}
+
+.MessageBar {
+    margin-bottom: 24px;
+    position:relative;
+    width: 100%;
+}
+
+.MessageInput {
+    padding: 10px 10px;
+    background-color: #40444b;
+    border: none;
+    width: 99%;
+    border-radius: 8px;
+    color: white;
+    font-weight: 400;
+    text-indent: 0;
+}
