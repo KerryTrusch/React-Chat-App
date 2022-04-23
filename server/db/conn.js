@@ -12,7 +12,7 @@ module.exports = {
         client.connect(function (err, db) {
             if (db)
             {
-                _db = db.db("employees");
+                _db = db.db("DiscordClone");
                 console.log("Successfully connected to Mongo");
             }
             return callback(err);
