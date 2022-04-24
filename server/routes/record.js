@@ -4,20 +4,32 @@ const express = require("express");
 // We use it to define our routes.
 // The router will be added as a middleware and will take control of requests starting with path /record.
 const recordRoutes = express.Router();
+const users = require('../db/users');
+const messages = require('../db/messages');
 
-// This will help us connect to the database
-const dbo = require("../db/conn");
+//53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+const cyrb53 = function(str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1>>>0);
+};
 
-// This help convert the id from string to ObjectId for the _id.
-const ObjectId = requrie("mongodb").ObjectId;
-
-recordRoutes.route("/record/:id").get(function (req, res) {
-    let db_connect = dbo.getDb();
-    db_connect
-        .collection("users")
-        .find({})
-        .toArray(function (err, result) {
-            if (err) throw err;
-            res.json(result);
-        })
+recordRoutes.route("/login").post(function (req, res) {
+    const {username, password} = req.body;
+    users.findOne({username: username, password: password}, function(err, result) {
+        if (err) console.log(err);
+        if (result == null) {
+            res.send({"token": null});
+        } else {
+        res.send({"token": cyrb53(username)});
+        }
+    });
 })
+
+module.exports = recordRoutes;

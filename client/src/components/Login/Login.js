@@ -2,7 +2,7 @@ import "./Login.css";
 import { useState } from 'react';
 
 async function loginUser(credentials) {
-    return fetch('http://localhost:3000/login', {
+    return fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -34,7 +34,7 @@ function Login({setToken}) {
                         <label for="Username">Username</label>
                         <input id="Username" onChange={e => setUsername(e.target.value)}/>
                         <label for="Password">Password</label>
-                        <input id="Password" onChange={e => setPassword(e.target.value)} />
+                        <input id="Password" type="password" onChange={e => setPassword(e.target.value)} />
                         <button type="submit" className="loginButton">Login</button>
                         <h5>Don't have an account? <a href="#">Register</a></h5>
                     </div>

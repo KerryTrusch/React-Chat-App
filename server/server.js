@@ -6,14 +6,21 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(require("./routes/record"));
+const mongoose = require('mongoose');
 
-//driver connections
-const dbo = require("./db/conn");
+//Set up default mongoose connection
+var mongoDB = process.env.ATLAS_URI;
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+
+//Get the default connection
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+
 
 app.listen(port, () =>  {
-    dbo.connectToServer(function (err) {
-        if (err) console.error(err);
-    });
 
     console.log(`Server is running on port: ${port}`);
 });

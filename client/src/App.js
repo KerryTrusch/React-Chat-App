@@ -3,10 +3,12 @@ import Headers from './components/ServerBar/header';
 import Sidebar from './components/DMSAndChannels/Sidebar';
 import ChatArea from './components/ChatArea/ChatArea';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { useEffect, useState, React } from 'react';
+import React, { useEffect, useState} from 'react';
 import Login from './components/Login/Login';
+import useToken from './components/useToken';
+
 function App() {
-  const [token, setToken] = useState();
+  const { token, setToken } = useToken();
   const TokenContext = React.createContext("NULL");
 
   if (!token) {
