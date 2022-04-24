@@ -36,7 +36,7 @@ function Login({setToken}) {
                         <label for="Password">Password</label>
                         <input id="Password" type="password" onChange={e => setPassword(e.target.value)} />
                         <button type="submit" className="loginButton">Login</button>
-                        <h5>Don't have an account? <a href="#">Register</a></h5>
+                        <h5>Don't have an account? <Link path="/register">Register</Link></h5>
                     </div>
                 </form>
             </div>
