@@ -80,3 +80,23 @@
 .innerFormLogin h5 a {
     color: #00aff4;
 }
+
+.innerFormLoginSuccess {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    margin-top: 125px;
+}
+
+.innerFormLoginSuccess h2 {
+    color: white;
+    font-weight: bold;
+    margin: 0;
+}
+
+.innerFormLoginSuccess h3 {
+    color: #72767d;
+    font-size: medium;
+    font-weight: 700;
+}

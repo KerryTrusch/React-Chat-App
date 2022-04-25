@@ -1,5 +1,6 @@
 import "./Login.css";
 import { useState } from 'react';
+import {Link} from 'react-router-dom';
 
 async function loginUser(credentials) {
     return fetch('http://localhost:5000/login', {
@@ -31,12 +32,12 @@ function Login({setToken}) {
                     <div className="innerFormLogin">
                         <h2>Welcome back!</h2>
                         <h3>Please enter your credentials to login.</h3>
-                        <label for="Username">Username</label>
-                        <input id="Username" onChange={e => setUsername(e.target.value)}/>
-                        <label for="Password">Password</label>
-                        <input id="Password" type="password" onChange={e => setPassword(e.target.value)} />
+                        <label htmlFor="Username">Username</label>
+                        <input id="Username" autoComplete="username" onChange={e => setUsername(e.target.value)}/>
+                        <label htmlFor="Password">Password</label>
+                        <input id="Password" type="password" autoComplete="password" onChange={e => setPassword(e.target.value)} />
                         <button type="submit" className="loginButton">Login</button>
-                        <h5>Don't have an account? <Link path="/register">Register</Link></h5>
+                        <h5>Don't have an account? <Link to="/register">Register</Link></h5>
                     </div>
                 </form>
             </div>
