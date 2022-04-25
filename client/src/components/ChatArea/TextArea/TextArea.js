@@ -1,8 +1,10 @@
 import "./TextArea.css";
 function TextArea() {
     return (
-        <div className="TextAreaWrapper">
+        <div className="TextWrapper">
+            <div className="TextContent">
 
+            </div>
         </div>
     )
 }

@@ -12,11 +12,18 @@ function App() {
 
   // We want users to only be able to visit our specified public directories (basically anything other than the main app)
   useEffect(() => {
-    const publicDirectories = ["/login", "/register", "success"];
+    const publicDirectories = ["/login", "/register"];
     if (!token && !(window.location.pathname in publicDirectories)) {
-      navigate('/login', {replace: true});
+      navigate('/login', { replace: true });
     }
   }, [token])
+
+  useEffect(() => {
+    if (token) {
+      navigate('/', {replace: true})
+    }
+  }, [token])
+  
   if (!token) {
     return (
       <Routes>
@@ -27,10 +34,13 @@ function App() {
     )
   }
 
-  
+
   return (
     <Routes>
       <Route path="/" element={<AppDriver token={token} />} />
+      <Route path="/login" element={<Login setToken={setToken} />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/success" element={<AccSuccess />} />
     </Routes>
   );
 }
