@@ -20,7 +20,7 @@ function App() {
 
   useEffect(() => {
     if (token) {
-      navigate('/', {replace: true})
+      navigate('/channels', {replace: true})
     }
   }, [token])
   
@@ -37,7 +37,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<AppDriver token={token} />} />
+      <Route path="/channels" element={<AppDriver />} />
       <Route path="/login" element={<Login setToken={setToken} />} />
       <Route path="/register" element={<Register />} />
       <Route path="/success" element={<AccSuccess />} />

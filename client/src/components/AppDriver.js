@@ -3,16 +3,13 @@ import Sidebar from './DMSAndChannels/Sidebar';
 import ChatArea from './ChatArea/ChatArea';
 import React from 'react';
 
-function AppDriver({ token }) {
-    const TokenContext = React.createContext("");
+function AppDriver() {
     return (
-        <TokenContext.Provider value={token}>
             <div style={{display: 'flex'}}>
                 <Headers />
                 <Sidebar />
                 <ChatArea />
             </div>
-        </TokenContext.Provider>
     )
 }
 

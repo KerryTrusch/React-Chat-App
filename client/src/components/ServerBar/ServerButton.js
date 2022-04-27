@@ -1,9 +1,10 @@
 import './ServerButton.css';
+import {Link} from 'react-router-dom';
 function ServerButton(props) {
     return (
-        <a href={props.link}>
-            <img className="serverButton" src={props.src} />    
-        </a>
+        <Link to={props.link}>
+            <img className="serverButton" alt='' src={props.src} />    
+        </Link>
     )
 }
 

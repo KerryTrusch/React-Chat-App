@@ -6,7 +6,9 @@ const express = require("express");
 const recordRoutes = express.Router();
 const users = require('../db/users');
 const messages = require('../db/messages');
+const server = require('../db/ChatServer');
 const { default: mongoose } = require("mongoose");
+const { ServerClosedEvent } = require("mongodb");
 
 //53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = function (str, seed = 0) {
@@ -26,9 +28,12 @@ recordRoutes.route("/login").post(function (req, res) {
     users.findOne({ username: username, password: password }, function (err, result) {
         if (err) console.log(err);
         if (result == null) {
-            res.send({ "token": null });
+            res.send({ "token": 0 });
         } else {
-            res.send({ "token": cyrb53(username, 5) });
+            const token = cyrb53(username + Date.now());
+            result.authid = token;
+            result.save();
+            res.send({ "token": token });
         }
     });
 })
@@ -40,7 +45,7 @@ recordRoutes.route("/register").post(function (req, res) {
         if (result != null) {
             res.send({ "Condition": "COLLISION" });
         } else {
-            let newUser = new users({ id: cyrb53(username), username: username, password: password });
+            let newUser = new users({ id: cyrb53(username), authid: 0, username: username, password: password, servers: [] });
             if (username.length < 4 || password.length < 4 || username.length > 20 || password.length > 50) {
                 res.send({ "Condition": "INVALID" })
             } else {
@@ -52,4 +57,23 @@ recordRoutes.route("/register").post(function (req, res) {
         }
     });
 })
+
+recordRoutes.route("/getservers").get(function (req, res) {
+    servers.find({}, function(err, result) {
+        if (err) console.log(err);
+        res.send(result);
+    })
+})
+
+recordRoutes.route("/createserver").post(function (req, res) {
+    const { token, serverName }= req.body
+    users.findOne({authid: token}, function (err, result) {
+        if (err || !result) res.send({"CONDITION": token});
+        let newServer = new server({id: cyrb53(token + Date.now(), 1), src: 'discord-pfp.png', name: serverName});
+        newServer.users.push(result);
+        newServer.save();
+        res.send({"Condition": "SUCCESS"});
+    })
+})
+
 module.exports = recordRoutes;
