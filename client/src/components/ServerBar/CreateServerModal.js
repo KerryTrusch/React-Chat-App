@@ -1,5 +1,6 @@
 import './CreateServerModal.css';
 import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 async function makeServer(data) { 
     return fetch("http://localhost:5000/createserver", {
@@ -13,21 +14,26 @@ async function makeServer(data) {
 }
 
 function CreateServer({ handleClose, show }) {
+    const navigate = useNavigate();
     const [serverName, setServerName] = useState();
     const handleCreation = async e => {
         e.preventDefault();
         const token = JSON.parse(sessionStorage.getItem('token')).token;
-        const serverId = makeServer({
+        const condition = await makeServer({
             token,
             serverName
         })
-        console.log(serverId);
+        console.log(condition.Condition);
+        if (condition.Condition == "SUCCESS") {
+            handleClose()
+            navigate('')
+        }
     }   
 
     const showHideClassName = show ? "ServerModal display-block" : "ServerModal display-none";
     return (
         <div className={showHideClassName} onClick={handleClose}>
-            <div className="ServerModal-main">
+            <div className="ServerModal-main" onClick={e => e.stopPropagation()}>
                 <form onSubmit={handleCreation}>
                 <div className="ServerModal-inner">
                     <h2>Create a server</h2>

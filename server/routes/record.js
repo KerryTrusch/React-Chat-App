@@ -59,20 +59,25 @@ recordRoutes.route("/register").post(function (req, res) {
 })
 
 recordRoutes.route("/getservers").get(function (req, res) {
-    servers.find({}, function(err, result) {
+    servers.find({}, function (err, result) {
         if (err) console.log(err);
         res.send(result);
     })
 })
 
 recordRoutes.route("/createserver").post(function (req, res) {
-    const { token, serverName }= req.body
-    users.findOne({authid: token}, function (err, result) {
-        if (err || !result) res.send({"CONDITION": token});
-        let newServer = new server({id: cyrb53(token + Date.now(), 1), src: 'discord-pfp.png', name: serverName});
-        newServer.users.push(result);
-        newServer.save();
-        res.send({"Condition": "SUCCESS"});
+    const { token, serverName } = req.body
+    users.findOne({ authid: token }, function (err, result) {
+        if (err || !result || !serverName || serverName.length < 1) {
+            res.send({ "CONDITION": token });
+        }
+        else {
+            let serverId = cyrb53(token + Date.now(), 1)
+            let newServer = new server({ id: serverId, src: 'discord-pfp.png', name: serverName });
+            newServer.users.push(result);
+            newServer.save();
+            res.send({ "Condition": "SUCCESS", "id": serverId });
+        }
     })
 })
 
