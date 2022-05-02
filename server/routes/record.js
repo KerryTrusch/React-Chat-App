@@ -45,7 +45,7 @@ recordRoutes.route("/register").post(function (req, res) {
         if (result != null) {
             res.send({ "Condition": "COLLISION" });
         } else {
-            let newUser = new users({ id: cyrb53(username), authid: 0, username: username, password: password, servers: [] });
+            let newUser = new users({ _id: new mongoose.Types.ObjectId(), id: cyrb53(username), authid: 0, username: username, password: password, servers: [] });
             if (username.length < 4 || password.length < 4 || username.length > 20 || password.length > 50) {
                 res.send({ "Condition": "INVALID" })
             } else {
@@ -58,10 +58,13 @@ recordRoutes.route("/register").post(function (req, res) {
     });
 })
 
-recordRoutes.route("/getservers").get(function (req, res) {
-    servers.find({}, function (err, result) {
-        if (err) console.log(err);
-        res.send(result);
+recordRoutes.route("/getuserservers").post(function (req, res) {
+    const { token } = req.body;
+    users.findOne({authid: token}).populate('servers').exec(function(err, user) {
+        if (err || !servers) res.send({"CONDITION": "FAILURE"});
+        else {
+            res.send({"CONDITION" : "SUCCESS", "SERVERS": user});
+        }
     })
 })
 
@@ -73,9 +76,12 @@ recordRoutes.route("/createserver").post(function (req, res) {
         }
         else {
             let serverId = cyrb53(token + Date.now(), 1)
-            let newServer = new server({ id: serverId, src: 'discord-pfp.png', name: serverName });
+            let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName });
             newServer.users.push(result);
-            newServer.save();
+            newServer.save(function(e, r) {
+                result.servers.push(newServer);
+                result.save();
+            });
             res.send({ "Condition": "SUCCESS", "id": serverId });
         }
     })
