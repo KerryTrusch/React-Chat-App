@@ -61,9 +61,9 @@ recordRoutes.route("/register").post(function (req, res) {
 recordRoutes.route("/getuserservers").post(function (req, res) {
     const { token } = req.body;
     users.findOne({authid: token}).populate('servers').exec(function(err, user) {
-        if (err || !servers) res.send({"CONDITION": "FAILURE"});
+        if (err || !user) res.send({"CONDITION": "FAILURE"});
         else {
-            res.send({"CONDITION" : "SUCCESS", "SERVERS": user});
+            res.send({"CONDITION" : "SUCCESS", "SERVERS": user.servers});
         }
     })
 })
@@ -82,7 +82,7 @@ recordRoutes.route("/createserver").post(function (req, res) {
                 result.servers.push(newServer);
                 result.save();
             });
-            res.send({ "Condition": "SUCCESS", "id": serverId });
+            res.send({ "Condition": "SUCCESS", "id": newServer });
         }
     })
 })

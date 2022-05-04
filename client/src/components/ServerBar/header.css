@@ -16,8 +16,10 @@
 }
 
 .liForServers a {
-    display: block;
+    display: flex;
+    justify-content: center;
     color: white;
+    box-sizing: border-box;
     padding: 14px 14px;
 }
 

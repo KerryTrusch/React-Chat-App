@@ -1,4 +1,4 @@
-import Headers from './ServerBar/header';
+import ServerHeader from './ServerBar/header';
 import Sidebar from './DMSAndChannels/Sidebar';
 import ChatArea from './ChatArea/ChatArea';
 import React, { useEffect, useState } from 'react';
@@ -11,31 +11,26 @@ async function getServers(authId) {
         },
         body: JSON.stringify(authId)
     })
-    .then(data => data.json())
+        .then(data => data.json())
 }
 
 function AppDriver() {
-    const [servers, setServers] = useState('');
-
-    useEffect(() => {
-
-        if (!servers) {
-            loadServers();
-        }
-    }, [servers])
+    const [servers, setServers] = useState([]);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
-        const servers = await getServers({token});
-        setServers(servers.SERVERS);
+        var newServers = await getServers({ token });
+        newServers = newServers.SERVERS;
+        setServers(newServers);
     }
-    console.log(servers);
+    useEffect(() => {
+        loadServers()
+    }, [servers, servers.length])
     return (
-            <div style={{display: 'flex'}}>
-                <Headers />
-
-                <Sidebar />
-                <ChatArea />
-            </div>
+        <div style={{ display: 'flex' }}>
+            <ServerHeader servers={servers} setServers={setServers}/>
+            <Sidebar />
+            <ChatArea />
+        </div>
     )
 }
 

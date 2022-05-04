@@ -13,7 +13,7 @@ async function makeServer(data) {
     .then(data => data.json())
 }
 
-function CreateServer({ handleClose, show }) {
+function CreateServer({ handleClose, show, setServers, servers }) {
     const navigate = useNavigate();
     const [serverName, setServerName] = useState();
     const handleCreation = async e => {
@@ -23,9 +23,11 @@ function CreateServer({ handleClose, show }) {
             token,
             serverName
         })
-        console.log(condition.Condition);
         if (condition.Condition == "SUCCESS") {
             handleClose()
+            var joined = servers.concat(condition.id);
+            setServers({servers: joined});
+            setServers();
             navigate('')
         }
     }   
