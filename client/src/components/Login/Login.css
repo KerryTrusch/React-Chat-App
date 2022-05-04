@@ -1,20 +1,26 @@
 .loginWrapper {
-    width: 100%;
-    height: 100%;
+    width: 100%; 
+    height: 100vh;
     display:flex;
     align-content: center;
     justify-content: center;
 }
 
+.loginWrapperCenter {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    min-width: 784px;
+    height:100%;
+}
 .loginInnerWrapper {
-    position: relative;
     min-height: 400px;
     align-items: center;
     justify-content: center;
     background-color: #36393f;
     width: 784px;
     border-radius: 5px;
-    top: 400px;
 }
 
 .loginForm {

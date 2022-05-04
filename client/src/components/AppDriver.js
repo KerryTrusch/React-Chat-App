@@ -4,7 +4,7 @@ import ChatArea from './ChatArea/ChatArea';
 import React, { useEffect, useState } from 'react';
 
 async function getServers(authId) {
-    return fetch("http://localhost:5000/getuserservers", {
+    return fetch("http://localhost:8000/getuserservers", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
