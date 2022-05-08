@@ -23,7 +23,7 @@ function CreateServer({ handleClose, show, setServers, servers }) {
             token,
             serverName
         })
-        if (condition.Condition == "SUCCESS") {
+        if (condition.Condition === "SUCCESS") {
             handleClose();
             setServers((prevState) => ([
                 ...prevState, condition.id

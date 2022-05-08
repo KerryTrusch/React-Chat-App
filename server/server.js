@@ -7,8 +7,8 @@ app.use(cors());
 app.use(express.json());
 app.use(require("./routes/record"));
 const mongoose = require('mongoose');
-import { WebSocketServer } from "ws";
-const wss = WebSocketServer({port: 8000});
+//import { WebSocketServer } from "ws";
+//const wss = WebSocketServer({port: 8000});
 
 //Set up default mongoose connection
 var mongoDB = process.env.ATLAS_URI;

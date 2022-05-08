@@ -3,9 +3,14 @@
     background-color: #202225;
     margin: 0;
     padding: 0;
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: scroll;
     width: 75px;
     height: 100vh;
+}
+
+.ulForServers::-webkit-scrollbar {
+    display:none;
 }
 
 .liForServers {
