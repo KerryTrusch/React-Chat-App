@@ -22,6 +22,7 @@ function AppDriver() {
         newServers = newServers.SERVERS;
         setServers(newServers);
     }
+
     useEffect(() => {
         loadServers()
     }, [servers, servers.length])

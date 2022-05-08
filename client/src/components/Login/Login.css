@@ -4,6 +4,7 @@
     display:flex;
     align-content: center;
     justify-content: center;
+    background-color: #3131e8;
 }
 
 .loginWrapperCenter {

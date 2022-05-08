@@ -2,11 +2,13 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config({path: "./config.env"});
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 app.use(require("./routes/record"));
 const mongoose = require('mongoose');
+import { WebSocketServer } from "ws";
+const wss = WebSocketServer({port: 8000});
 
 //Set up default mongoose connection
 var mongoDB = process.env.ATLAS_URI;

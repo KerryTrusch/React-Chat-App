@@ -3,7 +3,7 @@
     background-color: #202225;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: scroll;
     width: 75px;
     height: 100vh;
 }

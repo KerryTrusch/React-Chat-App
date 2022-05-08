@@ -3,7 +3,7 @@ import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 async function makeServer(data) { 
-    return fetch("http://localhost:5000/createserver", {
+    return fetch("http://localhost:8000/createserver", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -24,11 +24,11 @@ function CreateServer({ handleClose, show, setServers, servers }) {
             serverName
         })
         if (condition.Condition == "SUCCESS") {
-            handleClose()
-            var joined = servers.concat(condition.id);
-            setServers({servers: joined});
-            setServers();
-            navigate('')
+            handleClose();
+            setServers((prevState) => ([
+                ...prevState, condition.id
+            ]));
+            navigate('');
         }
     }   
 
