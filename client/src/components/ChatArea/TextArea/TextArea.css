@@ -1,4 +1,5 @@
 .TextContent {
+    display: flex;
     min-height: 100%;
     overflow-anchor: none;
     flex-direction: column;

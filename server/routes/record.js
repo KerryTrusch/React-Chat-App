@@ -1,5 +1,4 @@
 const express = require("express");
-
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
 // The router will be added as a middleware and will take control of requests starting with path /record.
@@ -8,7 +7,7 @@ const users = require('../db/users');
 const messages = require('../db/messages');
 const server = require('../db/ChatServer');
 const { default: mongoose } = require("mongoose");
-const { ServerClosedEvent } = require("mongodb");
+
 
 //53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = function (str, seed = 0) {
