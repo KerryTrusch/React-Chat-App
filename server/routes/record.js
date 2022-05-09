@@ -1,4 +1,6 @@
 const express = require("express");
+var app = require('../server');
+var expressWs = require('express-ws')(app);
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
 // The router will be added as a middleware and will take control of requests starting with path /record.
@@ -74,7 +76,7 @@ recordRoutes.route("/createserver").post(function (req, res) {
             res.send({ "CONDITION": token });
         }
         else {
-            let serverId = cyrb53(token + Date.now(), 1)
+            let serverId = cyrb53(((Date.now() * 2097151).toString()), 1);
             let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName });
             newServer.users.push(result);
             newServer.save(function(e, r) {

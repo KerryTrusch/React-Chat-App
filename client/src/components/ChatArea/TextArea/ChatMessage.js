@@ -6,7 +6,7 @@ function ChatMessage({ source }) {
             <div className="messageInner">
                 <img src={source.src} />
                 <div className="messageNameAndBodyWrapper">
-                    <div>
+                    <div className="nameAndTime">
                         <span>{source.name}</span>
                         <small>{source.time}</small>
                     </div>

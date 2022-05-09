@@ -2,7 +2,7 @@ import ServerHeader from './ServerBar/header';
 import Sidebar from './DMSAndChannels/Sidebar';
 import ChatArea from './ChatArea/ChatArea';
 import React, { useEffect, useState } from 'react';
-
+import { Route, Routes } from 'react-router-dom';
 async function getServers(authId) {
     return fetch("http://localhost:8000/getuserservers", {
         method: 'POST',
@@ -26,12 +26,24 @@ function AppDriver() {
     useEffect(() => {
         loadServers()
     }, [servers, servers.length])
+    const home = <div style={{ display: 'flex' }}>
+        <ServerHeader servers={servers} setServers={setServers} />
+        <Sidebar />
+        <ChatArea />
+    </div>
+
+
+    const server = <div style={{ display: 'flex' }}>
+        <ServerHeader servers={servers} setServers={setServers} />
+        <Sidebar />
+        <ChatArea />
+    </div>
+
     return (
-        <div style={{ display: 'flex' }}>
-            <ServerHeader servers={servers} setServers={setServers}/>
-            <Sidebar />
-            <ChatArea />
-        </div>
+        <Routes>
+            <Route path="/:id" element={server} />
+            <Route exact path="/" element={home} />
+        </Routes>
     )
 }
 

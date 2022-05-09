@@ -37,7 +37,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/channels" element={<AppDriver />} />
+      <Route path="/channels/*" element={<AppDriver />} />
       <Route path="/login" element={<Login setToken={setToken} />} />
       <Route path="/register" element={<Register />} />
       <Route path="/success" element={<AccSuccess />} />
