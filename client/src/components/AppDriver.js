@@ -3,6 +3,7 @@ import Sidebar from './DMSAndChannels/Sidebar';
 import ChatArea from './ChatArea/ChatArea';
 import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+
 async function getServers(authId) {
     return fetch("http://localhost:8000/getuserservers", {
         method: 'POST',
