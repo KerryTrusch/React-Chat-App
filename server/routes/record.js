@@ -1,5 +1,5 @@
 const express = require("express");
-var app = require('../server');
+const app = require('../server');
 var expressWs = require('express-ws')(app);
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
@@ -9,8 +9,7 @@ const users = require('../db/users');
 const messages = require('../db/messages');
 const server = require('../db/ChatServer');
 const { default: mongoose } = require("mongoose");
-
-
+const serverMap = new Map();
 //53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = function (str, seed = 0) {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -87,5 +86,12 @@ recordRoutes.route("/createserver").post(function (req, res) {
         }
     })
 })
+
+recordRoutes.ws('/', function(ws, req) {
+    ws.on('message', function(msg) {
+        ws.send(msg);
+    });
+    
+});
 
 module.exports = recordRoutes;

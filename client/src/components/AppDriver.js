@@ -16,6 +16,7 @@ async function getServers(authId) {
 }
 
 function AppDriver() {
+    var socket = new WebSocket('ws://localhost:8000');
     const [servers, setServers] = useState([]);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
