@@ -31,14 +31,14 @@ function AppDriver() {
     const home = <div style={{ display: 'flex' }}>
         <ServerHeader servers={servers} setServers={setServers} />
         <Sidebar />
-        <ChatArea />
+        <ChatArea socket={socket} />
     </div>
 
 
     const server = <div style={{ display: 'flex' }}>
         <ServerHeader servers={servers} setServers={setServers} />
         <Sidebar />
-        <ChatArea />
+        <ChatArea socket={socket}/>
     </div>
 
     return (
