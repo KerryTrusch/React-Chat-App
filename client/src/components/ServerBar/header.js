@@ -3,7 +3,7 @@ import './ServerButton.css';
 import CreateServer from './CreateServerModal';
 import ServerButton from './ServerButton';
 import React, { useState } from 'react';
-function Header({ servers, setServers, socket }) {
+function Header({ servers, setServers }) {
     const [showmod, setShowmod] = useState();
 
     const showModal = () => {
@@ -19,7 +19,7 @@ function Header({ servers, setServers, socket }) {
     if (servers) {
         listOfServers = servers.map((server) =>
             <li className="liForServers" key={server._id}>
-                <ServerButton src={server.src} link={server.id} socket={socket}/>
+                <ServerButton src={server.src} link={server.id} />
             </li>
         );
     } else {
