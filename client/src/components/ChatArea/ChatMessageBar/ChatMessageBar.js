@@ -5,7 +5,7 @@ function ChatMessageBar(props) {
     const [body, setBody] = useState();
     const handleSubmit = async e => {
         e.preventDefault();
-        
+        const obj = {op: 2, body: body}
     }
     return (
             <form className="MessageForm">

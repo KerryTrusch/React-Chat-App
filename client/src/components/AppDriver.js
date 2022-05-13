@@ -29,16 +29,16 @@ function AppDriver() {
         loadServers()
     }, [servers, servers.length])
     const home = <div style={{ display: 'flex' }}>
-        <ServerHeader servers={servers} setServers={setServers} />
+        <ServerHeader servers={servers} setServers={setServers} socket={socket}/>
         <Sidebar />
-        <ChatArea />
+        <ChatArea socket={socket}/>
     </div>
 
 
     const server = <div style={{ display: 'flex' }}>
-        <ServerHeader servers={servers} setServers={setServers} />
+        <ServerHeader servers={servers} setServers={setServers} socket={socket}/>
         <Sidebar />
-        <ChatArea />
+        <ChatArea socket={socket}/>
     </div>
 
     return (
