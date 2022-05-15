@@ -10,6 +10,7 @@ const messages = require('../db/messages');
 const server = require('../db/ChatServer');
 const { default: mongoose } = require("mongoose");
 const serverMap = new Map();
+serverMap.set(0, []);
 //53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = function (str, seed = 0) {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -22,6 +23,26 @@ const cyrb53 = function (str, seed = 0) {
     h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
+
+const addUserToServer = function(server, user) {
+    if (!serverMap.has(server)) {
+        serverMap.set(server, [user])
+    } else {
+        serverMap.set(server, serverMap.get(server).append(user))
+    }
+}
+
+const removeUserFromServer = function(server, user) {
+    if (!serverMap.has(server) || !serverMap.get(server).includes(user)) {
+        return;
+    } else {
+        userArr = serverMap.get(server)
+        serverMap.set(server, userArr.splice(userArr.indexOf(user), 1))
+        if (userArr.length == 0) {
+            serverMap.delete(server)
+        }
+    }
+}
 
 recordRoutes.route("/login").post(function (req, res) {
     const { username, password } = req.body;
@@ -89,7 +110,17 @@ recordRoutes.route("/createserver").post(function (req, res) {
 
 recordRoutes.ws('/', function(ws, req) {
     ws.on('message', function(msg) {
-        ws.send(msg);
+        const data = JSON.parse(msg.data);
+        if (data.op == 0) {
+            addUserToServer(data.server, data.token);
+        }
+        else if (data.op == 1) {
+            removeUserFromServer(data.oldServer, data.token);
+            addUserToServer(data.newServer, data.token);
+        }
+        else if (data.op == 2) {
+
+        }
     });
     
 });

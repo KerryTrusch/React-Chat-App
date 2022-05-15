@@ -15,6 +15,8 @@ async function getServers(authId) {
         .then(data => data.json())
 }
 
+const client = new WebSocket('ws://localhost:8000')
+
 function AppDriver() {
     const [servers, setServers] = useState([]);
     const loadServers = async () => {
@@ -27,15 +29,21 @@ function AppDriver() {
     useEffect(() => {
         loadServers()
     }, [servers, servers.length])
+
+    useEffect(() => {
+        client.onopen = function() {
+            const obj = {op: 0, server: 0, token: JSON.parse(sessionStorage.getItem('token'))}
+        }
+    }, [])
     const home = <div style={{ display: 'flex' }}>
-        <ServerHeader servers={servers} setServers={setServers}/>
+        <ServerHeader servers={servers} setServers={setServers} socket={client}/>
         <Sidebar />
         <ChatArea />
     </div>
 
 
     const server = <div style={{ display: 'flex' }}>
-        <ServerHeader servers={servers} setServers={setServers}/>
+        <ServerHeader servers={servers} setServers={setServers} socket={client}/>
         <Sidebar />
         <ChatArea />
     </div>
