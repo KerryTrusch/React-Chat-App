@@ -112,6 +112,20 @@ recordRoutes.route("/createserver").post(function (req, res) {
     })
 })
 
+recordRoutes.route("/getmessages").post(function (req, res) {
+    const { serverId } = req.body;
+    server.findOne({id: serverId}, function (err, result) {
+        if (err || !result) {
+            res.send({"CONDITION": "FAILURE"});
+        } else {
+            res.send({"CONDITION" : "SUCCESS"});
+        }
+    });
+})
+
+recordRoutes.route("/addmessage").post(function (req, res) {
+        
+})
 recordRoutes.ws('/', function (ws, req) {
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);

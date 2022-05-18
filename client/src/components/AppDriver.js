@@ -28,7 +28,7 @@ function AppDriver() {
 
     useEffect(() => {
         loadServers()
-    }, [servers, servers.length])
+    }, [servers])
 
     useEffect(() => {
         client.onopen = function() {
