@@ -33,6 +33,10 @@ function AppDriver() {
     useEffect(() => {
         client.onopen = function() {
             const obj = {op: 0, server: 0, token: JSON.parse(sessionStorage.getItem('token'))}
+            client.send(JSON.stringify(obj))
+        }
+        client.onmessage = function(evt) {
+            console.log(evt.data)
         }
     }, [])
     const home = <div style={{ display: 'flex' }}>

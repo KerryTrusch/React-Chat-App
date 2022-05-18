@@ -10,7 +10,7 @@ const messages = require('../db/messages');
 const server = require('../db/ChatServer');
 const { default: mongoose } = require("mongoose");
 const serverMap = new Map();
-serverMap.set(0, []);
+
 //53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = function (str, seed = 0) {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -24,15 +24,19 @@ const cyrb53 = function (str, seed = 0) {
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
 
-const addUserToServer = function(server, user) {
+const addUserToServer = function (server, user) {
     if (!serverMap.has(server)) {
-        serverMap.set(server, [user])
+        serverMap.set(server, [user.token])
     } else {
-        serverMap.set(server, serverMap.get(server).append(user))
+        var users = serverMap.get(server)
+        if (!users.includes(user.token)) {
+            users.push(user.token)
+            serverMap.set(server, users)
+        }
     }
 }
 
-const removeUserFromServer = function(server, user) {
+const removeUserFromServer = function (server, user) {
     if (!serverMap.has(server) || !serverMap.get(server).includes(user)) {
         return;
     } else {
@@ -81,10 +85,10 @@ recordRoutes.route("/register").post(function (req, res) {
 
 recordRoutes.route("/getuserservers").post(function (req, res) {
     const { token } = req.body;
-    users.findOne({authid: token}).populate('servers').exec(function(err, user) {
-        if (err || !user) res.send({"CONDITION": "FAILURE"});
+    users.findOne({ authid: token }).populate('servers').exec(function (err, user) {
+        if (err || !user) res.send({ "CONDITION": "FAILURE" });
         else {
-            res.send({"CONDITION" : "SUCCESS", "SERVERS": user.servers});
+            res.send({ "CONDITION": "SUCCESS", "SERVERS": user.servers });
         }
     })
 })
@@ -99,7 +103,7 @@ recordRoutes.route("/createserver").post(function (req, res) {
             let serverId = cyrb53(((Date.now() * 2097151).toString()), 1);
             let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName });
             newServer.users.push(result);
-            newServer.save(function(e, r) {
+            newServer.save(function (e, r) {
                 result.servers.push(newServer);
                 result.save();
             });
@@ -108,9 +112,9 @@ recordRoutes.route("/createserver").post(function (req, res) {
     })
 })
 
-recordRoutes.ws('/', function(ws, req) {
-    ws.on('message', function(msg) {
-        const data = JSON.parse(msg.data);
+recordRoutes.ws('/', function (ws, req) {
+    ws.on('message', function (msg) {
+        const data = JSON.parse(msg);
         if (data.op == 0) {
             addUserToServer(data.server, data.token);
         }
@@ -121,8 +125,10 @@ recordRoutes.ws('/', function(ws, req) {
         else if (data.op == 2) {
 
         }
+        console.log(serverMap);
+        ws.send(JSON.stringify({ map: serverMap }))
     });
-    
+
 });
 
 module.exports = recordRoutes;
