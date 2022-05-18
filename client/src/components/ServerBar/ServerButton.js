@@ -4,7 +4,10 @@ function ServerButton(props) {
     let navigate = useNavigate();
     const handleClick = e => {
         e.preventDefault();
-        const url = window.location.pathname
+        var url = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
+        if (url === 'channels') {
+            url = 0
+        }
         const obj = {op: 1, newRoom: props.link, oldRoom: url, token: JSON.parse(sessionStorage.getItem('token'))}
         props.socket.send(JSON.stringify(obj))
         navigate(`/channels/${props.link}`);

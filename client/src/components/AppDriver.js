@@ -36,7 +36,11 @@ function AppDriver() {
             client.send(JSON.stringify(obj))
         }
         client.onmessage = function(evt) {
-            console.log(evt.data)
+            
+        }
+        client.onclose = function() {
+            const obj = {op: 2, token: JSON.parse(sessionStorage.getItem('token'))}
+            client.send(JSON.stringify(obj));
         }
     }, [])
     const home = <div style={{ display: 'flex' }}>

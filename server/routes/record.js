@@ -10,7 +10,7 @@ const messages = require('../db/messages');
 const server = require('../db/ChatServer');
 const { default: mongoose } = require("mongoose");
 const serverMap = new Map();
-
+const usersMap = new Map();
 //53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = function (str, seed = 0) {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -23,7 +23,7 @@ const cyrb53 = function (str, seed = 0) {
     h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
-
+// Make it so that adding a user adds {user.token, ws instance}
 const addUserToServer = function (server, user) {
     if (!serverMap.has(server)) {
         serverMap.set(server, [user.token])
@@ -117,13 +117,14 @@ recordRoutes.ws('/', function (ws, req) {
         const data = JSON.parse(msg);
         if (data.op == 0) {
             addUserToServer(data.server, data.token);
+            usersMap.set(data.token.token, ws);
         }
         else if (data.op == 1) {
             removeUserFromServer(data.oldServer, data.token);
             addUserToServer(data.newServer, data.token);
         }
         else if (data.op == 2) {
-
+            
         }
         console.log(serverMap);
         ws.send(JSON.stringify({ map: serverMap }))
