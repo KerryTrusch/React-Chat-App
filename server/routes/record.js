@@ -124,23 +124,26 @@ recordRoutes.route("/getmessages").post(function (req, res) {
 })
 
 recordRoutes.route("/addmessage").post(function (req, res) {
-        
+
 })
 recordRoutes.ws('/', function (ws, req) {
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);
-        if (data.op == 0) {
-            addUserToServer(data.server, data.token);
-            usersMap.set(data.token.token, ws);
+        switch (data.op) {
+            case 0:
+                addUserToServer(data.server, data.token);
+                usersMap.set(data.token.token, ws);
+            case 1:
+                removeUserFromServer(data.oldServer, data.token);
+                addUserToServer(data.newServer, data.token);
+            case 2:
+                //remove user on disconnect
+            case 3:
+                //send message
+            case 9:
+                ws.send(data.heartbeat)
+
         }
-        else if (data.op == 1) {
-            removeUserFromServer(data.oldServer, data.token);
-            addUserToServer(data.newServer, data.token);
-        }
-        else if (data.op == 2) {
-            
-        }
-        console.log(serverMap);
         ws.send(JSON.stringify({ map: serverMap }))
     });
 
