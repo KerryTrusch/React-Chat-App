@@ -32,6 +32,7 @@ function AppDriver() {
 
     
     useEffect(() => {
+        client = new WebSocket('ws://localhost:8000')
         var heartbeat_msg = '--heartbeat--', heartbeat_interval = null;
         client.onopen = () => {
             const obj = { op: 0, server: 0, token: JSON.parse(sessionStorage.getItem('token')) }

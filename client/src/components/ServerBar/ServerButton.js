@@ -8,7 +8,7 @@ function ServerButton(props) {
         if (url === 'channels') {
             url = 0
         }
-        const obj = {op: 1, newRoom: props.link, oldRoom: url, token: JSON.parse(sessionStorage.getItem('token'))}
+        const obj = {op: 1, newServer: props.link, oldServer: url, token: JSON.parse(sessionStorage.getItem('token'))}
         props.socket.send(JSON.stringify(obj))
         navigate(`/channels/${props.link}`);
     }

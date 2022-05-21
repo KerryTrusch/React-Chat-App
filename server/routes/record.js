@@ -102,7 +102,7 @@ recordRoutes.route("/createserver").post(function (req, res) {
         }
         else {
             let serverId = cyrb53(((Date.now() * 2097151).toString()), 1);
-            let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName });
+            let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName, messages: [] });
             newServer.users.push(result);
             newServer.save(function (e, r) {
                 result.servers.push(newServer);
@@ -115,11 +115,11 @@ recordRoutes.route("/createserver").post(function (req, res) {
 
 recordRoutes.route("/getmessages").post(function (req, res) {
     const { serverId } = req.body;
-    server.findOne({id: serverId}, function (err, result) {
+    server.findOne({ id: serverId }, function (err, result) {
         if (err || !result) {
-            res.send({"CONDITION": "FAILURE"});
+            res.send({ "CONDITION": "FAILURE" });
         } else {
-            res.send({"CONDITION" : "SUCCESS"});
+            res.send({ "CONDITION": "SUCCESS" });
         }
     });
 })
@@ -133,34 +133,60 @@ recordRoutes.ws('/', function (ws, req) {
         switch (data.op) {
             case 0:
                 //User joins the chat, initalize them 
+                console.log('joined')
                 addUserToServer(data.server, data.token);
-                usersMap.set(data.token.token, [ws, data.server]);
+                let tempArr = new Array();
+                tempArr[0] = ws
+                tempArr[1] = data.server
+                usersMap.set(data.token.token, tempArr);
+                break;
             case 1:
                 //User changes channel
                 removeUserFromServer(data.oldServer, data.token);
                 addUserToServer(data.newServer, data.token);
-                usersMap.set(data.token.token, [ws, data.newServer])
+                let newtempArr = new Array();
+                newtempArr[0] = ws
+                newtempArr[1] = data.newServer
+                usersMap.set(data.token.token, newtempArr)
+                break;
             case 2:
                 //remove user on disconnect
                 removeUserFromServer(usersMap.get(data.token.token)[1], data.token)
                 usersMap.delete(data.token.token)
+                break;
             case 3:
-                users.findOne({authid: data.token.token}, function (err, res) {
+                //Add a message
+                users.findOne({ authid: data.token.token }, function (err, res) {
                     if (err || !res) {
                         ws.send('error')
                     } else {
-                        const obj = {time: Date.now(), src: 'discord-pfp.png', body: data.body, name: data.name}
-                        usersToEmit = serverMap.get(data.token.token)
+                        const obj = { time: Date.now(), src: 'discord-pfp.png', body: data.body, name: data.name }
+                        usersToEmit = serverMap.get(usersMap.get(data.token.token)[1])
                         for (const user of usersToEmit) {
-                            if (user != data.token) {
+                            if (user != data.token.token) {
                                 usersMap.get(user)[0].send(JSON.stringify(obj))
                             }
                         }
+                        let newMessage = new messages({ id: cyrb53(((Date.now() * 2097151).toString()), 1), body: data.body, author: res })
+                        newMessage.save(function (e, r) {
+                            const userServer = usersMap.get(data.token.token)[1]
+                            server.findOne({ id: userServer }, function (err, result) {
+                                if (err || !result) {
+                                    console.log('error finding server')
+                                } else {
+                                    result.messages.push(newMessage);
+                                    result.save();
+                                }
+                            })
+                        })
                     }
                 })
+                break;
             case 9:
                 ws.send(data.heartbeat)
-
+                break;
+            default:
+                break;
         }
     });
 
