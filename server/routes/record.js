@@ -29,6 +29,7 @@ const addUserToServer = function (server, user) {
         serverMap.set(server, [user.token])
     } else {
         var users = serverMap.get(server)
+        console.log(user);
         if (!users.includes(user.token)) {
             users.push(user.token)
             serverMap.set(server, users)
@@ -131,20 +132,36 @@ recordRoutes.ws('/', function (ws, req) {
         const data = JSON.parse(msg);
         switch (data.op) {
             case 0:
+                //User joins the chat, initalize them 
                 addUserToServer(data.server, data.token);
-                usersMap.set(data.token.token, ws);
+                usersMap.set(data.token.token, [ws, data.server]);
             case 1:
+                //User changes channel
                 removeUserFromServer(data.oldServer, data.token);
                 addUserToServer(data.newServer, data.token);
+                usersMap.set(data.token.token, [ws, data.newServer])
             case 2:
                 //remove user on disconnect
+                removeUserFromServer(usersMap.get(data.token.token)[1], data.token)
+                usersMap.delete(data.token.token)
             case 3:
-                //send message
+                users.findOne({authid: data.token.token}, function (err, res) {
+                    if (err || !res) {
+                        ws.send('error')
+                    } else {
+                        const obj = {time: Date.now(), src: 'discord-pfp.png', body: data.body, name: data.name}
+                        usersToEmit = serverMap.get(data.token.token)
+                        for (const user of usersToEmit) {
+                            if (user != data.token) {
+                                usersMap.get(user)[0].send(JSON.stringify(obj))
+                            }
+                        }
+                    }
+                })
             case 9:
                 ws.send(data.heartbeat)
 
         }
-        ws.send(JSON.stringify({ map: serverMap }))
     });
 
 });
