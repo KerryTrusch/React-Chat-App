@@ -14,7 +14,7 @@ function ServerButton(props) {
     }
     return (
         <Link to={`/channels/${props.link}`} onClick={handleClick}>
-            <img className="serverButton" alt='' src={props.src} />    
+            <img className="serverButton" onerror="this.src='discord-pfp.png" alt='' src={props.src} />    
         </Link>
     )
 }

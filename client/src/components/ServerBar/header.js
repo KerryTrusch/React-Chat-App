@@ -32,7 +32,7 @@ function Header({ servers, setServers, socket }) {
                 <li className="liForServers">
                     <CreateServer show={showmod} handleClose={hideModal} setServers={setServers} servers={servers}/>
                     <button type="button" onClick={showModal}>
-                        <img className="serverButton" alt='' src='create-plus.png' />
+                        <img className="serverButton" onerror="this.src='create-plus.png'" alt='' src='create-plus.png' />
                     </button>
                 </li>
             </ul>
