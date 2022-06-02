@@ -19,6 +19,7 @@ let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
     const [missed_heartbeats, setMissed_heartbeats] = useState(0);
+    const [messages, setMessages] = useState([]);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
         var newServers = await getServers({ token });
@@ -62,16 +63,16 @@ function AppDriver() {
     }, [])
 
     const home = <div style={{ display: 'flex' }}>
-        <ServerHeader servers={servers} setServers={setServers} socket={client} />
+        <ServerHeader servers={servers} setServers={setServers} socket={client} setMessages={setMessages} />
         <Sidebar />
-        <ChatArea socket={client} beats={setMissed_heartbeats}/>
+        <ChatArea socket={client} beats={setMissed_heartbeats} messages={messages} setMessages={setMessages}/>
     </div>
 
 
     const server = <div style={{ display: 'flex' }}>
-        <ServerHeader servers={servers} setServers={setServers} socket={client} />
+        <ServerHeader servers={servers} setServers={setServers} socket={client} setMessages={setMessages} />
         <Sidebar />
-        <ChatArea socket={client} beats={setMissed_heartbeats}/>
+        <ChatArea socket={client} beats={setMissed_heartbeats} messages={messages} setMessages={setMessages}/>
     </div>
 
     return (

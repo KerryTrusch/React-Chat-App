@@ -7,6 +7,7 @@ const userSchema = new Schema({
     authid: Number,
     username: String,
     password: String,
+    discriminant: Number,
     servers: [{type: Schema.Types.ObjectId, ref: 'Server'}]
 });
 

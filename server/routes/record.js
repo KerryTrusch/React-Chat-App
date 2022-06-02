@@ -64,24 +64,33 @@ recordRoutes.route("/login").post(function (req, res) {
     });
 })
 
-
+// TODO: add a discriminant to everybody's name to make it easier to add friends
+// TODO: separate the logic from getting messages from a server and from a friend. 
+// TODO: users should have a friends array that takes in a kv pair of the username and their messages
 recordRoutes.route("/register").post(function (req, res) {
     const { username, password } = req.body;
-    users.findOne({ username: username }, function (err, result) {
-        if (result != null) {
+    let discriminant = 0;
+    let flag = false;
+    if (username.length < 4 || password.length < 4 || username.length > 20 || password.length > 50) {
+        res.send({ "Condition": "INVALID" })
+    } else {
+        while (discriminant <= 9999 && !flag) {
+            users.findOne({ username: username, discriminant: discriminant }, function (err, result) {
+                if (result != null) {
+                    discriminant++;
+                } else {
+                    flag = true;
+                    let newUser = new users({ _id: new mongoose.Types.ObjectId(), id: cyrb53(username), authid: 0, username: username, password: password, discriminant: discriminant, servers: [] });
+                    newUser.save();
+                }
+            });
+        }
+        if (!flag) {
             res.send({ "Condition": "COLLISION" });
         } else {
-            let newUser = new users({ _id: new mongoose.Types.ObjectId(), id: cyrb53(username), authid: 0, username: username, password: password, servers: [] });
-            if (username.length < 4 || password.length < 4 || username.length > 20 || password.length > 50) {
-                res.send({ "Condition": "INVALID" })
-            } else {
-                newUser.save(function (err, obj) {
-                    if (err) console.log(err);
-                    else res.send({ "Condition": "SUCCESS" });
-                })
-            }
+            res.send({ "Condition": "SUCCESS" });
         }
-    });
+    }
 })
 
 recordRoutes.route("/getuserservers").post(function (req, res) {
@@ -113,17 +122,16 @@ recordRoutes.route("/createserver").post(function (req, res) {
     })
 })
 
-recordRoutes.route("/getmessages").post(function (req, res) {
+recordRoutes.route("/getservermessages").post(function (req, res) {
     const { serverId } = req.body;
-    server.findOne({ id: serverId }, function (err, result) {
-        if (err || !result) {
-            res.send({ "CONDITION": "FAILURE" });
-        } else {
-            res.send({ "CONDITION": "SUCCESS" });
-        }
+    server.findOne({id: serverId}, function(err, res) {
+        res.send({'CONDITION':'SUCCESS', 'messages': res.messages});
     });
 })
 
+recordRoutes.route("/getdmmessages").post(function (req, res) {
+
+})
 recordRoutes.route("/addmessage").post(function (req, res) {
 
 })
@@ -160,14 +168,15 @@ recordRoutes.ws('/', function (ws, req) {
                     if (err || !res) {
                         ws.send('error')
                     } else {
-                        const obj = { time: Date.now(), src: 'discord-pfp.png', body: data.body, name: data.name }
+                        const time = Date.now()
+                        const obj = { time: time, src: 'discord-pfp.png', body: data.body, name: data.name }
                         usersToEmit = serverMap.get(usersMap.get(data.token.token)[1])
                         for (const user of usersToEmit) {
                             if (user != data.token.token) {
                                 usersMap.get(user)[0].send(JSON.stringify(obj))
                             }
                         }
-                        let newMessage = new messages({ id: cyrb53(((Date.now() * 2097151).toString()), 1), body: data.body, author: res })
+                        let newMessage = new messages({ id: cyrb53(((time * 2097151).toString()), 1), body: data.body, timestamp: time, author: res })
                         newMessage.save(function (e, r) {
                             const userServer = usersMap.get(data.token.token)[1]
                             server.findOne({ id: userServer }, function (err, result) {
