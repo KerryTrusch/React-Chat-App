@@ -1,12 +1,15 @@
 import "./TextArea.css";
 import ChatMessage from "./ChatMessage";
-import { useState } from "react";
-function TextArea() {
-    var testData = {"src": "discord-pfp.png", "name":"test", "time": "11:59 PM", "body":"this is a test message"}
-        return (
+function TextArea({ messageList }) {
+    let messages = messageList.map((info) =>
+        <ChatMessage source={info} key={info} />
+    );
+    return (
         <div className="TextWrapper">
-            <div className="TextContent">
-                <ChatMessage source={testData} />
+            <div className="absolute top-0 right-0 bottom-0 left-0 overflow-x-hidden overflow-y-scroll min-h-0">
+                <div className="TextContent">
+                    {messages}
+                </div>
             </div>
         </div>
     )

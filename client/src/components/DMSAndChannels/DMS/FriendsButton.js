@@ -5,7 +5,7 @@ function FriendsButton(props) {
         <div className="DMWrapper">
             <Link className="DMContainer" to={`/channels/${props.link}`}>
                 <div className="DMPFPContainer">
-                    <img src={props.src} alt='' className="DMPic" />
+                    <img src={`/${props.src}`} alt='' className="DMPic" />
                 </div>
                 <div className="DMSpanWrapper">
                     <span className="DMSpan">{props.name}</span>

@@ -1,34 +1,31 @@
 const express = require("express");
 const app = require('../server');
 var expressWs = require('express-ws')(app);
+require("dotenv").config({ path: "./config.env" });
+const JWT_KEY = process.env.PRIVATE_KEY;
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
 // The router will be added as a middleware and will take control of requests starting with path /record.
 const recordRoutes = express.Router();
-const users = require('../db/users');
-const messages = require('../db/messages');
-const server = require('../db/ChatServer');
-const { default: mongoose } = require("mongoose");
 const serverMap = new Map();
 const usersMap = new Map();
-//53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
-const cyrb53 = function (str, seed = 0) {
-    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
-    for (let i = 0, ch; i < str.length; i++) {
-        ch = str.charCodeAt(i);
-        h1 = Math.imul(h1 ^ ch, 2654435761);
-        h2 = Math.imul(h2 ^ ch, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-};
+const mysql = require('mysql2');
+const argon2 = require('argon2');
+var jwt = require('jsonwebtoken');
+const connection = mysql.createPool({
+    host: '192.168.86.31',
+    port: 3306,
+    user: 'sammy',
+    password: 'password',
+    database: 'ml_app'
+});
+
 // Make it so that adding a user adds {user.token, ws instance}
-const addUserToServer = function (server, user) {
+const addUserToServerMap = function (server, user) {
     if (!serverMap.has(server)) {
         serverMap.set(server, [user.token])
     } else {
-        var users = serverMap.get(server)
+        let users = serverMap.get(server)
         if (!users.includes(user.token)) {
             users.push(user.token)
             serverMap.set(server, users)
@@ -36,7 +33,7 @@ const addUserToServer = function (server, user) {
     }
 }
 
-const removeUserFromServer = function (server, user) {
+const removeUserFromServerMap = function (server, user) {
     if (!serverMap.has(server) || !serverMap.get(server).includes(user)) {
         return;
     } else {
@@ -48,98 +45,194 @@ const removeUserFromServer = function (server, user) {
     }
 }
 
-recordRoutes.route("/login").post(function (req, res) {
-    const { username, password } = req.body;
-    users.findOne({ username: username, password: password }, function (err, result) {
-        if (err) console.log(err);
-        if (result == null) {
-            res.send({ "token": 0 });
-        } else {
-            const token = cyrb53(username + Date.now());
-            result.authid = token;
-            result.save();
-            res.send({ "token": token });
-        }
-    });
-})
+const findUser = async (username) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'SELECT * FROM `users` WHERE `uname` = ?',
+        [username]
+    );
+    return row;
+}
 
+const findUserByID = async (id) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'SELECT * FROM `users` WHERE `id` = ?',
+        [id]
+    );
+    return row;
+}
 
-recordRoutes.route("/register").post(function (req, res) {
+const createServer = async (snowflake, name) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'INSERT INTO `server` (`serverID`, `name`) VALUES (?, ?)',
+        [snowflake, name]
+    );
+}
+
+const findServerByID = async (snowflake) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'SELECT * FROM `server` WHERE `serverID` = ?',
+        [snowflake]
+    );
+    return row;
+}
+
+const findUsersServers = async (id) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'SELECT * FROM `server` WHERE `serverID` IN (SELECT `serverID` FROM `users_in_server` WHERE ? = `userID`)',
+        [id]
+    );
+    return row;
+}
+
+const findAllMessagesInChannel = async (snowflake) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'SELECT * FROM `server_messages` WHERE `channel_id` = ? ORDER BY cast(`timestamp` as bigint) asc',
+        [snowflake]
+    );
+    return row;
+}
+
+const findChannelsByServerID = async (snowflake) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'SELECT * FROM `channel` WHERE `serverID` = ? ORDER BY `pos_order` asc',
+        [snowflake]
+    );
+    return row;
+}
+
+const createChannel = async (channelSnowflake, serverSnowflake, name, order) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'INSERT INTO channel (`channelID`, `serverID`, `name`, `pos_order`) VALUES (?, ?, ?, ?)',
+        [channelSnowflake, serverSnowflake, name, order]
+    );
+}
+
+const addUserToServer = async (id, serverSnowflake) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'INSERT INTO `users_in_server` (`userID`, `serverID`) VALUES (?, ?)',
+        [id, serverSnowflake]
+    );
+}
+
+recordRoutes.route("/login").post(async (req, res) => {
     const { username, password } = req.body;
-    users.findOne({ username: username }, function (err, result) {
-        if (result != null) {
-            res.send({ "Condition": "COLLISION" });
-        } else {
-            let newUser = new users({ _id: new mongoose.Types.ObjectId(), id: cyrb53(username), authid: 0, username: username, password: password, servers: [] });
-            if (username.length < 4 || password.length < 4 || username.length > 20 || password.length > 50) {
-                res.send({ "Condition": "INVALID" })
+    const user = await findUser(username);
+    const info = user[0];
+    if (user.length > 0) {
+        try {
+            // Correct username, password correctly verified
+            if (await argon2.verify(info.pword, password)) {
+                const token = jwt.sign({ id: info.id }, JWT_KEY);
+                res.send({token:token});
+            // Correct username, password incorrect
             } else {
-                newUser.save(function (err, obj) {
-                    if (err) console.log(err);
-                    else res.send({ "Condition": "SUCCESS" });
-                })
+                res.sendStatus(401);
             }
+        // Random error
+        } catch (err) {
+            console.log(err);
+            res.sendStatus(400);
         }
-    });
+    // Incorrect username/user does not exist
+    } else {
+        res.status(404).send('Not found');
+    }
 })
 
-recordRoutes.route("/getuserservers").post(function (req, res) {
+
+recordRoutes.route("/register").post(async (req, res) => {
+    const { username, password } = req.body;
+    const user = await findUser(username);
+    if (user.hasOwnProperty('id')) {
+        res.sendStatus(404);
+    } else {
+        try {
+            const hash = await argon2.hash(password);
+            connection.execute(
+                'INSERT INTO `users` (`uname`, `pword`) VALUES (?, ?)',
+                [username, hash],
+                function (err, results, fields) {
+                    res.status(200).send('Account successfully created');
+                }
+            )
+        } catch (err) {
+            console.log(err);
+            res.sendStatus(400);
+        }
+    }
+})
+
+recordRoutes.route("/getservers").post(async (req, res) => {
     const { token } = req.body;
-    users.findOne({ authid: token }).populate('servers').exec(function (err, user) {
-        if (err || !user) res.send({ "CONDITION": "FAILURE" });
-        else {
-            res.send({ "CONDITION": "SUCCESS", "SERVERS": user.servers });
-        }
-    })
+    const decoded = jwt.verify(token, JWT_KEY);
+    const id = decoded.id;
+    const servers = await findUsersServers(id);
+    res.status(200).send(servers);
 })
 
-recordRoutes.route("/createserver").post(function (req, res) {
+
+recordRoutes.route("/createserver").post(async (req, res) => {
     const { token, serverName } = req.body
-    users.findOne({ authid: token }, function (err, result) {
-        if (err || !result || !serverName || serverName.length < 1) {
-            res.send({ "CONDITION": token });
-        }
-        else {
-            let serverId = cyrb53(((Date.now() * 2097151).toString()), 1);
-            let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName });
-            newServer.users.push(result);
-            newServer.save(function (e, r) {
-                result.servers.push(newServer);
-                result.save();
-            });
-            res.send({ "Condition": "SUCCESS", "id": newServer });
-        }
-    })
+    const decoded = jwt.verify(token, JWT_KEY);
+    const id = decoded.id;
+    const serverSnowflake = Date.now().toString(36);
+    createServer(serverSnowflake, serverName);
+    const channelSnowflake = (Date.now() + 1).toString(36);
+    createChannel(channelSnowflake, serverSnowflake, "general", 0);
+    addUserToServer(id, serverSnowflake);
+    res.sendStatus(200);
 })
 
-recordRoutes.route("/getmessages").post(function (req, res) {
-    const { serverId } = req.body;
-    server.findOne({id: serverId}, function (err, result) {
-        if (err || !result) {
-            res.send({"CONDITION": "FAILURE"});
-        } else {
-            res.send({"CONDITION" : "SUCCESS"});
-        }
-    });
+//Changed to GET, put serverID in url
+recordRoutes.route("/getmessages/:serverID").get(async (req, res) => {
+    const serverID = req.params.serverID;
+    console.log(serverID);
+    // server.findOne({id: serverId}, function (err, result) {
+    //     if (err || !result) {
+    //         res.send({"CONDITION": "FAILURE"});
+    //     } else {
+    //         res.send({"CONDITION" : "SUCCESS"});
+    //     }
+    // });
 })
 
 recordRoutes.route("/addmessage").post(function (req, res) {
 
-})
+
+});
+
 recordRoutes.ws('/', function (ws, req) {
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);
         switch (data.op) {
             case 0:
-                addUserToServer(data.server, data.token);
+                addUserToServerMap(data.server, data.token);
                 usersMap.set(data.token.token, ws);
             case 1:
-                removeUserFromServer(data.oldServer, data.token);
-                addUserToServer(data.newServer, data.token);
+                removeUserFromServerMap(data.oldServer, data.token);
+                addUserToServerMap(data.newServer, data.token);
             case 2:
-                //remove user on disconnect
+            //remove user on disconnect
             case 3:
-                //send message
+            //send message
             case 9:
                 ws.send(data.heartbeat)
 

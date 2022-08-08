@@ -1,8 +1,9 @@
 import "./MidButton.css";
+import {Link} from 'react-router-dom';
 function MidButton(props) {
     return (
         <div className="MidButtonWrapper">
-            <a className="MidButtonContainer" href="#">
+            <Link to="/channels/friends" className="MidButtonContainer" >
                 <div className="MidButtonSVG">
                     <svg aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
                         <g fill="none" fillRule="evenodd">
@@ -13,7 +14,7 @@ function MidButton(props) {
                 <div className="MidButtonSpanWrapper">
                     <span className="MidButtonSpan"> {props.name}</span>
                 </div>
-            </a>
+            </Link>
         </div>
     )
 }

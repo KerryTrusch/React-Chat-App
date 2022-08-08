@@ -7,7 +7,7 @@ function AccSuccess() {
       }, 5000);
 
     return (
-        <div className="loginWrapper">
+        <div className="loginWrapper" style={{backgroundImage: `url(miku_background.jpg)`, backgroundSize: 'cover'}}>
             <div className="loginInnerWrapper">
                 <form className="loginForm">
                     <div className="innerFormLoginSuccess">

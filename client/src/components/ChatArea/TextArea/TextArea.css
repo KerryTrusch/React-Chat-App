@@ -1,3 +1,14 @@
+.TextWrapper {
+    display:flex;
+    position: relative;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    z-index: 0;
+}
+
+
 .TextContent {
     display: flex;
     min-height: 100%;
@@ -5,13 +16,5 @@
     flex-direction: column;
     justify-content: flex-end;
     align-items: stretch;
-}
-
-.TextWrapper {
-    display:flex;
-    position: relative;
     flex: 1 1 auto;
-    min-height: 0;
-    min-width: 0;
-    z-index: 0;
 }

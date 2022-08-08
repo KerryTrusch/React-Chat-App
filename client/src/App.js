@@ -20,7 +20,7 @@ function App() {
 
   useEffect(() => {
     if (token) {
-      navigate('/channels', {replace: true})
+      navigate('/channels/friends', {replace: true})
     }
   }, [token])
   

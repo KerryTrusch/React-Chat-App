@@ -10,29 +10,41 @@ async function loginUser(credentials) {
         },
         body: JSON.stringify(credentials)
     })
-        .then(data => data.json())
+    .then(data => data.json());
 }
 
+const verifyLogin = (input) => {
+    return /^([a-zA-Z0-9@*#]{8,15})$/.test(input);
+}
 function Login({ setToken }) {
     const [username, setUsername] = useState();
     const [password, setPassword] = useState();
 
     const handleSubmit = async e => {
         e.preventDefault();
-        const token = await loginUser({
-            username,
-            password
-        });
-        setToken(token);
+        if (verifyLogin(username) && verifyLogin(password)) {
+            const error_text = document.getElementById('error_text');
+            error_text.style.display = "none";
+            const token = await loginUser({
+                username,
+                password
+            });
+            console.log(token);
+            setToken(token);
+        } else {
+            const error_text = document.getElementById('error_text');
+            error_text.style.display = "block";
+        }
     }
     return (
-        <div className="loginWrapper">
+        <div className="loginWrapper" style={{backgroundImage: `url(miku_background.jpg)`, backgroundSize: 'cover'}}>
             <div className="loginWrapperCenter">
                 <div className="loginInnerWrapper">
                     <form className="loginForm" onSubmit={handleSubmit}>
                         <div className="innerFormLogin">
                             <h2>Welcome back!</h2>
                             <h3>Please enter your credentials to login.</h3>
+                            <span id="error_text" style={{color: 'red', display: 'none'}}> Username or password is incorrect </span> 
                             <label htmlFor="Username">Username</label>
                             <input id="Username" autoComplete="username" onChange={e => setUsername(e.target.value)} />
                             <label htmlFor="Password">Password</label>

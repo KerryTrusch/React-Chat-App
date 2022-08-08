@@ -4,7 +4,7 @@ function ChatMessage({ source }) {
     return (
         <div className="messageWrapper">
             <div className="messageInner">
-                <img src={source.src} />
+                <img src={`/${source.src}`} alt=''/>
                 <div className="messageNameAndBodyWrapper">
                     <div className="nameAndTime">
                         <span>{source.name}</span>

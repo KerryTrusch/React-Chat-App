@@ -18,8 +18,8 @@ function Header({ servers, setServers, socket }) {
     var listOfServers;
     if (servers) {
         listOfServers = servers.map((server) =>
-            <li className="liForServers" key={server._id}>
-                <ServerButton src={server.src} link={server.id} socket={socket} />
+            <li className="liForServers" key={server.serverID}>
+                <ServerButton src={server.imgsrc} link={server.serverID} socket={socket} className="serverButton"/>
             </li>
         );
     } else {
@@ -32,7 +32,7 @@ function Header({ servers, setServers, socket }) {
                 <li className="liForServers">
                     <CreateServer show={showmod} handleClose={hideModal} setServers={setServers} servers={servers}/>
                     <button type="button" onClick={showModal}>
-                        <img className="serverButton" alt='' src='create-plus.png' />
+                        <img className="serverButton" alt='' src={'/create-plus.png'} />
                     </button>
                 </li>
             </ul>

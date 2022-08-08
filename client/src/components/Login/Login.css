@@ -1,35 +1,24 @@
 .loginWrapper {
     width: 100%; 
     height: 100vh;
-    display:flex;
-    align-content: center;
-    justify-content: center;
-    background-color: #3131e8;
 }
 
 .loginWrapperCenter {
-    display:flex;
-    flex-direction: column;
-    justify-content: center;
-    align-content: center;
-    min-width: 784px;
-    height:100%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width:25%;
 }
+
 .loginInnerWrapper {
-    min-height: 400px;
-    align-items: center;
-    justify-content: center;
     background-color: #36393f;
-    width: 784px;
     border-radius: 5px;
 }
 
 .loginForm {
-    box-sizing: border-box;
     padding:32px;
     font-size: 18px;
-    width:100%;
-    height:100%;
 }
 
 .innerFormLogin {
@@ -60,7 +49,7 @@
 .innerFormLogin input {
     margin-bottom: 15px;
     border-radius: 3px;
-    height: 30px;
+    padding:10px;
     border: none;
     background-color: black;
     color: white;
@@ -68,11 +57,11 @@
 
 .innerFormLogin button {
     border-radius: 5px;
+    padding: 13px;
     margin-top: 20px;
     background-color: #5865f1;
     color: #fff;
     border: none;
-    height: 40px;
     cursor: pointer;
 }
 
@@ -89,7 +78,7 @@
 }
 
 .innerFormLoginSuccess {
-    display:flex;
+    display:flex;                                                               
     flex-direction: column;
     justify-content: center;
     text-align: center;

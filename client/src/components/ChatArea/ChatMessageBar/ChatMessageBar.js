@@ -1,11 +1,18 @@
 import "./ChatMessageBar.css";
-import ChatMessage from "../TextArea/ChatMessage";
 import {useState} from 'react';
-function ChatMessageBar({name, setBody}) {
+function ChatMessageBar({name, addNewMessage}) {
+    const [body, setBody] = useState('');
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        document.getElementById("inputbar").value = '';
+        const info = {"src": "discord-pfp.png", "body": body, "time": "11:59 PM", "name": "Tester"};
+        addNewMessage(info);
+    }
     return (
-            <form className="MessageForm" onSubmit={(e) => {e.preventDefault(); document.getElementById('inputbar').value = '';}}>
+            <form className="MessageForm" onSubmit={handleSubmit}>
                 <div className="MessageBar">
-                    <input className="MessageInput" id="inputbar" onChange={e => {setBody(e.target.value)}} placeholder={"Message @" + {name} }/>
+                    <input className="MessageInput" id="inputbar" onChange={e => {setBody(e.target.value)}} placeholder={"Message @" + name }/>
                 </div>
             </form>
     )

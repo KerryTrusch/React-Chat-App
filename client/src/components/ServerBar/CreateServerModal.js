@@ -14,21 +14,17 @@ async function makeServer(data) {
 }
 
 function CreateServer({ handleClose, show, setServers, servers }) {
-    const navigate = useNavigate();
     const [serverName, setServerName] = useState();
     const handleCreation = async e => {
         e.preventDefault();
         const token = JSON.parse(sessionStorage.getItem('token')).token;
-        const condition = await makeServer({
+        const res = await makeServer({
             token,
             serverName
-        })
-        if (condition.Condition === "SUCCESS") {
+        });
+        console.log(res.status);
+        if (res.status === 200) {
             handleClose();
-            setServers((prevState) => ([
-                ...prevState, condition.id
-            ]));
-            navigate('');
         }
     }   
 
