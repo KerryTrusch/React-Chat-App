@@ -29,9 +29,8 @@ function Login({ setToken, setGlobal }) {
                 username,
                 password
             });
-            console.log(token);
             if (token) {
-                setGlobal(username);
+                sessionStorage.setItem('uname',  username);
             }
             setToken(token);
         } else {

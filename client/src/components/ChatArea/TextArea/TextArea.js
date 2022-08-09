@@ -2,7 +2,7 @@ import "./TextArea.css";
 import ChatMessage from "./ChatMessage";
 function TextArea({ messageList }) {
     let messages = messageList.map((info) =>
-        <ChatMessage source={info} key={info} />
+        <ChatMessage source={info} key={info.key} />
     );
     return (
         <div className="TextWrapper">

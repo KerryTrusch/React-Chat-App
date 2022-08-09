@@ -7,10 +7,10 @@ import useToken from './components/useToken';
 import Register from './components/Login/Register';
 import AccSuccess from './components/Login/AccountSuccess';
 import AppDriver from './components/AppDriver';
+
+export const nameContext = createContext('User');
 function App() {
   const { token, setToken } = useToken();
-  const [globalName, setGlobalName] = useState("");
-  const nameContext = createContext('User');
   let navigate = useNavigate();
 
   // We want users to only be able to visit our specified public directories (basically anything other than the main app)
@@ -30,7 +30,7 @@ function App() {
   if (!token) {
     return (
       <Routes>
-        <Route path="/login" element={<Login setToken={setToken} setGlobal={setGlobalName}/>} />
+        <Route path="/login" element={<Login setToken={setToken} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/success" element={<AccSuccess />} />
       </Routes>
@@ -39,14 +39,14 @@ function App() {
 
 
   return (
-    <Routes>
-      <nameContext.Provider value={globalName}>
+    <nameContext.Provider value={sessionStorage.getItem('uname')}>
+      <Routes>
         <Route path="/channels/*" element={<AppDriver />} />
-      </nameContext.Provider>
-      <Route path="/login" element={<Login setToken={setToken} />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/success" element={<AccSuccess />} />
-    </Routes>
+        <Route path="/login" element={<Login setToken={setToken} />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/success" element={<AccSuccess />} />
+      </Routes>
+    </nameContext.Provider>
   );
 }
 
