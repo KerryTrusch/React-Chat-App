@@ -13,7 +13,7 @@ const mysql = require('mysql2');
 const argon2 = require('argon2');
 var jwt = require('jsonwebtoken');
 const connection = mysql.createPool({
-    host: '192.168.86.31',
+    host: '73.43.191.158',
     port: 3306,
     user: 'sammy',
     password: 'password',
@@ -204,7 +204,6 @@ recordRoutes.route("/createserver").post(async (req, res) => {
 //Changed to GET, put serverID in url
 recordRoutes.route("/getmessages/:serverID").get(async (req, res) => {
     const serverID = req.params.serverID;
-    console.log(serverID);
     // server.findOne({id: serverId}, function (err, result) {
     //     if (err || !result) {
     //         res.send({"CONDITION": "FAILURE"});
@@ -215,7 +214,7 @@ recordRoutes.route("/getmessages/:serverID").get(async (req, res) => {
 })
 
 recordRoutes.route("/addmessage").post(function (req, res) {
-
+    const { message, serverName, channelID, token} = req.body;
 
 });
 
@@ -224,15 +223,17 @@ recordRoutes.ws('/', function (ws, req) {
         const data = JSON.parse(msg);
         switch (data.op) {
             case 0:
-                addUserToServerMap(data.server, data.token);
                 usersMap.set(data.token.token, ws);
             case 1:
-                removeUserFromServerMap(data.oldServer, data.token);
-                addUserToServerMap(data.newServer, data.token);
+                removeUserFromServerMap(data.oldServer, data.token.token);
+                addUserToServerMap(data.newServer, data.token.token);
             case 2:
             //remove user on disconnect
+                removeUserFromServerMap(usersMap.get(data.token.token))
+                usersMap.delete(data.token.token);
             case 3:
             //send message
+
             case 9:
                 ws.send(data.heartbeat)
 

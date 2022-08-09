@@ -16,7 +16,7 @@ async function loginUser(credentials) {
 const verifyLogin = (input) => {
     return /^([a-zA-Z0-9@*#]{8,15})$/.test(input);
 }
-function Login({ setToken }) {
+function Login({ setToken, setGlobal }) {
     const [username, setUsername] = useState();
     const [password, setPassword] = useState();
 
@@ -30,6 +30,9 @@ function Login({ setToken }) {
                 password
             });
             console.log(token);
+            if (token) {
+                setGlobal(username);
+            }
             setToken(token);
         } else {
             const error_text = document.getElementById('error_text');

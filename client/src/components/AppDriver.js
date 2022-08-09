@@ -22,13 +22,10 @@ async function getFriends() {
         }
     })
 }
-const client = new WebSocket('ws://localhost:8000')
-const heartbeat_msg = '--heartbeat--'
-let heartbeat_interval = null, missed_heartbeats = 0;
-
+let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
-
+    const [missed_heartbeats, setMissed_heartbeats] = useState(0);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
         const newServers = await getServers({ token });
@@ -45,14 +42,16 @@ function AppDriver() {
     }, [])
 
     useEffect(() => {
-        client.onopen = function () {
-            const obj = { op: 0, server: 0, token: JSON.parse(sessionStorage.getItem('token')) }
+        client = new WebSocket('ws://localhost:8000')
+        var heartbeat_msg = '--heartbeat--', heartbeat_interval = null;
+        client.onopen = () => {
+            const obj = { op: 0, token: JSON.parse(sessionStorage.getItem('token')) }
             client.send(JSON.stringify(obj))
             if (heartbeat_interval == null) {
-                missed_heartbeats = 0;
+                setMissed_heartbeats(0);
                 heartbeat_interval = setInterval(function () {
                     try {
-                        missed_heartbeats++;
+                        setMissed_heartbeats((prevVal) => prevVal + 1)
                         if (missed_heartbeats > 2) {
                             throw new Error("Too many missed heartbeats");
                         }
@@ -64,12 +63,6 @@ function AppDriver() {
                         client.close();
                     }
                 }, 5000)
-            }
-        }
-        client.onmessage = function (evt) {
-            if (evt.data === heartbeat_msg) {
-                missed_heartbeats = 0;
-                return;
             }
         }
         client.onclose = function () {
