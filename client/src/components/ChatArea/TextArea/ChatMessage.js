@@ -8,10 +8,10 @@ function ChatMessage({ source }) {
                 <div className="messageNameAndBodyWrapper">
                     <div className="nameAndTime">
                         <span>{source.name}</span>
-                        <small>{source.time}</small>
+                        <small>{source.timestamp}</small>
                     </div>
                     <div className="messageBody">
-                        {source.body}
+                        {source.message}
                     </div>
                 </div>
             </div>

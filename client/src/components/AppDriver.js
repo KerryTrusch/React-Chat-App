@@ -2,7 +2,7 @@ import Home from './Home';
 import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import ChatView from './ChatView';
-
+import Header from './ServerBar/header';
 async function getServers(authId) {
     return fetch("http://localhost:8000/getservers", {
         method: 'POST',
@@ -25,17 +25,14 @@ async function getFriends() {
 let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
+    const [channels, setChannels] = useState([]);
     const [missed_heartbeats, setMissed_heartbeats] = useState(0);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
         const newServers = await getServers({ token });
-        console.log(newServers);
         setServers(newServers);
     }
 
-    const loadMessages = async () => {
-
-    }
 
     useEffect(() => {
         loadServers()
@@ -72,10 +69,11 @@ function AppDriver() {
     }, [])
 
     return (
-        <div className='h-screen'>
+        <div className='flex h-screen w-full'>
+            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels}/>
             <Routes>
-                <Route exact path="/friends" element={<Home servers={servers} setServers={setServers} client={client} />} />
-                <Route exact path="/:id" element={<ChatView servers={servers} setServers={setServers} client={client} />} />
+                <Route exact path="/friends" element={<Home />} />
+                <Route path="/:id/*" element={<ChatView client={client} channels={channels}/>} />
             </Routes>
         </div>
     )

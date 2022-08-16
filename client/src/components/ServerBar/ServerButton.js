@@ -1,20 +1,35 @@
 import './ServerButton.css';
 import { Link, useNavigate } from 'react-router-dom';
-function ServerButton(props) {
+
+async function getChannels(serverID) {
+    return fetch("http://localhost:8000/getchannels", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(serverID)
+    })
+        .then(data => data.json())
+}
+
+function ServerButton({ src, link, socket, setChannels }) {
     let navigate = useNavigate();
-    const handleClick = e => {
+    const handleClick = async e => {
         e.preventDefault();
-        var url = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
-        if (url === 'channels') {
-            url = 0
+        var oldServerID = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
+        if (oldServerID === 'channels') {
+            oldServerID = 0
         }
-        const obj = { op: 1, newRoom: props.link, oldRoom: url, token: JSON.parse(sessionStorage.getItem('token')) }
-        props.socket.send(JSON.stringify(obj))
-        navigate(`/channels/${props.link}`);
+        const obj = { op: 1, newRoom: link, oldRoom: oldServerID, token: JSON.parse(sessionStorage.getItem('token')) }
+        socket.send(JSON.stringify(obj));
+        const serverID = link;
+        const channels = await getChannels({serverID});
+        setChannels(channels);
+        navigate(`/channels/${link}/${channels[0].channelID}`);
     }
     return (
-        <Link to={`/channels/${props.link}`} onClick={handleClick}>
-            <img className="serverButton" alt='' src={`/${props.src}`} />
+        <Link to={`/channels/${link}`} onClick={handleClick}>
+            <img className="serverButton" alt='' src={`/${src}`} />
         </Link>
     )
 }

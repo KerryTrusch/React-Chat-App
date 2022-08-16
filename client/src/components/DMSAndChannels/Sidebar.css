@@ -7,9 +7,6 @@
 }
 
 .FriendsFlexContainer {
-    position: relative;
-    box-sizing: border-box;
-    min-height: 0;
     height: calc(100% - 100px);
     -webkit-box-flex: 1;
     flex: 1 1 auto;

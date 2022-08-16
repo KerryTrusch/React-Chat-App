@@ -1,12 +1,11 @@
 import Header from "./ServerBar/header";
-import Sidebar from "./DMSAndChannels/Sidebar";
 import ChatArea from "./ChatArea/ChatArea";
-
-export default function ChatView({servers, setServers, client}) {
+import ChannelBar from "./DMSAndChannels/Channels/Channels";
+import {useState} from 'react';
+export default function ChatView({client, channels}) {
     return (
         <div className="flex w-full h-full overflow-hidden">
-            <Header servers={servers} setServers={setServers} socket={client} />
-            <Sidebar />
+            <ChannelBar channels={channels} />
             <ChatArea socket={client} />
         </div>
     )

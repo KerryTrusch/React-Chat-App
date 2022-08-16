@@ -5,3 +5,11 @@
     display:block;
     object-fit: cover;
 }
+
+.serverButtonSelected {
+    height: 46px;
+    width: 46px;
+    border-radius: 15px;
+    display:block;
+    object-fit: cover;
+}

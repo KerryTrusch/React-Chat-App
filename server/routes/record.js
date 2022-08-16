@@ -98,7 +98,7 @@ const findAllMessagesInChannel = async (snowflake) => {
     const promisePool = connection.promise();
     const [row, fields] = await 
     promisePool.execute(
-        'SELECT * FROM `server_messages` WHERE `channel_id` = ? ORDER BY cast(`timestamp` as bigint) asc',
+        'SELECT * FROM `server_messages` WHERE `channel_id` = ?',
         [snowflake]
     );
     return row;
@@ -129,6 +129,15 @@ const addUserToServer = async (id, serverSnowflake) => {
     promisePool.execute(
         'INSERT INTO `users_in_server` (`userID`, `serverID`) VALUES (?, ?)',
         [id, serverSnowflake]
+    );
+}
+
+const addMessageToChannel = async (channelID, message, serverID, timestamp, src, userID, name) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await 
+    promisePool.execute(
+        'INSERT INTO `server_messages` (`channel_id`, `message`, `serverID`, `timestamp`, `src`, `userID`, `name`) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [channelID, message, serverID, timestamp, src, userID, name]
     );
 }
 
@@ -188,9 +197,14 @@ recordRoutes.route("/getservers").post(async (req, res) => {
     res.status(200).send(servers);
 })
 
+recordRoutes.route("/getchannels").post(async (req, res) => {
+    const { serverID } = req.body;
+    const channels = await findChannelsByServerID(serverID);
+    res.status(200).send(channels);
+})
 
 recordRoutes.route("/createserver").post(async (req, res) => {
-    const { token, serverName } = req.body
+    const { token, serverName } = req.body;
     const decoded = jwt.verify(token, JWT_KEY);
     const id = decoded.id;
     const serverSnowflake = Date.now().toString(36);
@@ -201,21 +215,31 @@ recordRoutes.route("/createserver").post(async (req, res) => {
     res.sendStatus(200);
 })
 
-//Changed to GET, put serverID in url
-recordRoutes.route("/getmessages/:serverID").get(async (req, res) => {
-    const serverID = req.params.serverID;
-    // server.findOne({id: serverId}, function (err, result) {
-    //     if (err || !result) {
-    //         res.send({"CONDITION": "FAILURE"});
-    //     } else {
-    //         res.send({"CONDITION" : "SUCCESS"});
-    //     }
-    // });
+recordRoutes.route("/joinserver").post(async (req, res) => {
+    const { token, serverID } = req.body;
+    const decoded = jwt.verify(token, JWT_KEY);
+    const id = decoded.id;
+    addUserToServer(id, serverID);
+    res.sendStatus(200);
+})
+
+
+recordRoutes.route("/getmessages").post(async (req, res) => {
+    const { channelID } = req.body;
+    const messages = await findAllMessagesInChannel(channelID);
+    res.status(200).send(messages);
 })
 
 recordRoutes.route("/addmessage").post(function (req, res) {
-    const { message, serverName, channelID, token} = req.body;
-
+    const { src, body, time, name, token, serverID, channelID } = req.body;
+    if (token != undefined) {
+        const decoded = jwt.verify(token, JWT_KEY);
+        const userID = decoded.id;
+        addMessageToChannel(channelID, body, serverID, time, src, userID, name);
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(404);
+    }
 });
 
 recordRoutes.ws('/', function (ws, req) {

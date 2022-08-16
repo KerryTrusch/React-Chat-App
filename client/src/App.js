@@ -7,7 +7,7 @@ import useToken from './components/useToken';
 import Register from './components/Login/Register';
 import AccSuccess from './components/Login/AccountSuccess';
 import AppDriver from './components/AppDriver';
-
+import Invite from './components/invite';
 export const nameContext = createContext('User');
 function App() {
   const { token, setToken } = useToken();
@@ -42,6 +42,7 @@ function App() {
     <nameContext.Provider value={sessionStorage.getItem('uname')}>
       <Routes>
         <Route path="/channels/*" element={<AppDriver />} />
+        <Route path="/invite/*" element={<Invite />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/success" element={<AccSuccess />} />

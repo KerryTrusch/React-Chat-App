@@ -4,7 +4,7 @@ import CreateServer from './CreateServerModal';
 import ServerButton from './ServerButton';
 import React, { useState } from 'react';
 import {Link} from 'react-router-dom';
-function Header({ servers, setServers, socket }) {
+function Header({ servers, setServers, socket, setChannels }) {
     const [showmod, setShowmod] = useState();
 
     const showModal = () => {
@@ -20,7 +20,7 @@ function Header({ servers, setServers, socket }) {
     if (servers) {
         listOfServers = servers.map((server) =>
             <li className="liForServers" key={server.serverID}>
-                <ServerButton src={server.imgsrc} link={server.serverID} socket={socket} className="serverButton" />
+                <ServerButton src={server.imgsrc} link={server.serverID} socket={socket} className="serverButton" setChannels={setChannels} />
             </li>
         );
     } else {
@@ -34,9 +34,7 @@ function Header({ servers, setServers, socket }) {
                         <img className="serverButton" alt='' src={'/discord-logo.png'} />
                     </Link>
                 </li>
-                <div className='border-b-2 pt-3 w-2/5 m-auto border-[#373a3f]'>
-
-                </div>
+                <div className='border-b-2 pt-3 w-2/5 m-auto border-[#373a3f]' />
                 {listOfServers}
                 <li className="liForServers">
                     <CreateServer show={showmod} handleClose={hideModal} setServers={setServers} servers={servers} />
