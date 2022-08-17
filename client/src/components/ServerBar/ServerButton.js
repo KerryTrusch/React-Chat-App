@@ -16,14 +16,10 @@ function ServerButton({ src, link, socket, setChannels }) {
     let navigate = useNavigate();
     const handleClick = async e => {
         e.preventDefault();
-        var oldServerID = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
-        if (oldServerID === 'channels') {
-            oldServerID = 0
-        }
-        const obj = { op: 1, newRoom: link, oldRoom: oldServerID, token: JSON.parse(sessionStorage.getItem('token')) }
-        socket.send(JSON.stringify(obj));
         const serverID = link;
         const channels = await getChannels({serverID});
+        const obj = { op: 1, newServer: channels[0].channelID, token: JSON.parse(sessionStorage.getItem('token')).token }
+        socket.send(JSON.stringify(obj));
         setChannels(channels);
         navigate(`/channels/${link}/${channels[0].channelID}`);
     }

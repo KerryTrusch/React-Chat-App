@@ -1,4 +1,3 @@
-import Header from "./ServerBar/header";
 import Sidebar from "./DMSAndChannels/Sidebar";
 import FriendsTab from "./Friends/FriendsTab";
 

@@ -22,6 +22,7 @@ async function getFriends() {
         }
     })
 }
+
 let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
@@ -42,7 +43,7 @@ function AppDriver() {
         client = new WebSocket('ws://localhost:8000')
         var heartbeat_msg = '--heartbeat--', heartbeat_interval = null;
         client.onopen = () => {
-            const obj = { op: 0, token: JSON.parse(sessionStorage.getItem('token')) }
+            const obj = { op: 0, token: JSON.parse(sessionStorage.getItem('token')).token }
             client.send(JSON.stringify(obj))
             if (heartbeat_interval == null) {
                 setMissed_heartbeats(0);
@@ -62,8 +63,13 @@ function AppDriver() {
                 }, 5000)
             }
         }
+        client.onmessage = (e) => {
+            if (e.data === heartbeat_msg) {
+                setMissed_heartbeats(0);
+            }
+        }
         client.onclose = function () {
-            const obj = { op: 2, token: JSON.parse(sessionStorage.getItem('token')) }
+            const obj = { op: 2, token: JSON.parse(sessionStorage.getItem('token')).token }
             client.send(JSON.stringify(obj));
         }
     }, [])

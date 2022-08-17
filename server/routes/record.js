@@ -23,11 +23,12 @@ const connection = mysql.createPool({
 // Make it so that adding a user adds {user.token, ws instance}
 const addUserToServerMap = function (server, user) {
     if (!serverMap.has(server)) {
-        serverMap.set(server, [user.token])
+        let userArr = [user];
+        serverMap.set(server, userArr)
     } else {
         let users = serverMap.get(server)
-        if (!users.includes(user.token)) {
-            users.push(user.token)
+        if (!users.includes(user)) {
+            users.push(user)
             serverMap.set(server, users)
         }
     }
@@ -245,24 +246,39 @@ recordRoutes.route("/addmessage").post(function (req, res) {
 recordRoutes.ws('/', function (ws, req) {
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);
+        console.log(data.op + " : " + data.token);
         switch (data.op) {
             case 0:
-                usersMap.set(data.token.token, ws);
+                const userMapList = new Array();
+                userMapList[0] = ws; userMapList[1] = null;
+                usersMap.set(data.token, userMapList);
+                break;
             case 1:
-                removeUserFromServerMap(data.oldServer, data.token.token);
-                addUserToServerMap(data.newServer, data.token.token);
+                if (usersMap.get(data.token)[1] != null) {
+                    removeUserFromServerMap(usersMap.get(data.token)[1], data.token);
+                }
+                addUserToServerMap(data.newServer, data.token);
+                break;
             case 2:
             //remove user on disconnect
-                removeUserFromServerMap(usersMap.get(data.token.token))
-                usersMap.delete(data.token.token);
+                removeUserFromServerMap(usersMap.get(data.token)[1], data.token);
+                usersMap.delete(data.token);
+                break;
             case 3:
             //send message
-
+                const userArr = serverMap.get(data.channelID);
+                for (const user of userArr) {
+                    console.log(user + " : " + data.msgdata.token);
+                    if (user != data.msgdata.token) {
+                        usersMap.get(user)[0].send(JSON.stringify({op: 3, message: data.msgdata}));
+                    }
+                }
+                break;
             case 9:
                 ws.send(data.heartbeat)
+                break;
 
         }
-        ws.send(JSON.stringify({ map: serverMap }))
     });
 
 });
