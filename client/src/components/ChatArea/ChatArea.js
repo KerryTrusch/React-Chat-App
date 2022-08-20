@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
 import "./ChatArea.css";
 import ChatMessageBar from "./ChatMessageBar/ChatMessageBar";
 import TextArea from "./TextArea/TextArea";
-function ChatArea({ socket }) {
-    const [messageList, setMessageList] = useState([]);
+import ChatHeader from "./ChatHeader";
+import UserList from "./UserList";
+import { useEffect } from "react";
+function ChatArea({ socket, messageList, setMessageList, name, channelName }) {
 
-    const createMessageSocket = (messageData) => {
+    const sendMessageThroughSocket = (messageData) => {
         let wsInfo = { op: 3, msgdata: messageData, channelID: window.location.pathname.split('/')[3] };
         socket.send(JSON.stringify(wsInfo));
     }
@@ -24,15 +25,13 @@ function ChatArea({ socket }) {
     const addNewMessage = (info) => {
         setMessageList(oldArray => [...oldArray, info]);
         const { src, name } = info;
-        const body = info.message;
         const message = info.message;
-        const time = info.timestamp;
         const timestamp = info.timestamp;
         var url = window.location.pathname.split('/');
         const serverID = url[2];
         const channelID = url[3];
         let token = JSON.parse(sessionStorage.getItem("token")).token;
-        createMessageSocket({
+        sendMessageThroughSocket({
             src,
             message,
             timestamp,
@@ -43,8 +42,8 @@ function ChatArea({ socket }) {
         });
         addMessageToDB({
             src,
-            body,
-            time,
+            message,
+            timestamp,
             name,
             token,
             serverID,
@@ -52,40 +51,16 @@ function ChatArea({ socket }) {
         });
     }
 
-    async function loadMessages(channelID) {
-        return fetch('http://localhost:8000/getmessages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(channelID)
-        })
-            .then(data => data.json());
-    }
-
-
-    useEffect(() => {
-        const loadStartingMessages = async (channelID) => {
-            const messages = await loadMessages({ channelID });
-            console.log(messages);
-            setMessageList(messages);
-        }
-        const channelID = window.location.pathname.split('/');
-        loadStartingMessages(channelID[3]);
-        socket.onmessage = (e) => {
-            if (e.data !== '--heartbeat--') {
-                let msg = JSON.parse(e.data);
-                if (msg.op === 3) {
-                    setMessageList(oldArray => [...oldArray, msg.message]);
-                }
-            }
-        }
-    }, [])
-
     return (
-        <div className="ChatWrapper">
-            <TextArea messageList={messageList} />
-            <ChatMessageBar name="my wife" addNewMessage={addNewMessage} />
+        <div className="ChatWrapper w-full h-full">
+            <ChatHeader channelName={channelName} />
+            <div className="min-w-0 min-h-0 grow-1 shrink-1 basis-auto flex justify-items-stretch items-stretch relative h-full w-full">
+                <div className="flex flex-col min-w-0 min-h-0 grow-1 shrink-1 basis-auto h-full w-full">
+                    <TextArea messageList={messageList} />
+                    <ChatMessageBar name={channelName} addNewMessage={addNewMessage} />
+                </div>
+                <UserList users_online={1} />
+            </div>
         </div>
     )
 }

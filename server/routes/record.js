@@ -75,7 +75,7 @@ const createServer = async (snowflake, name) => {
     );
 }
 
-const findServerByID = async (snowflake) => {
+const findServerInfoByID = async (snowflake) => {
     const promisePool = connection.promise();
     const [row, fields] = await 
     promisePool.execute(
@@ -232,21 +232,26 @@ recordRoutes.route("/getmessages").post(async (req, res) => {
 })
 
 recordRoutes.route("/addmessage").post(function (req, res) {
-    const { src, body, time, name, token, serverID, channelID } = req.body;
+    const { src, message, timestamp, name, token, serverID, channelID } = req.body;
     if (token != undefined) {
         const decoded = jwt.verify(token, JWT_KEY);
         const userID = decoded.id;
-        addMessageToChannel(channelID, body, serverID, time, src, userID, name);
+        addMessageToChannel(channelID, message, serverID, timestamp, src, userID, name);
         res.sendStatus(200);
     } else {
         res.sendStatus(404);
     }
 });
 
+recordRoutes.route("/getserverinfo").post(async (req, res) => {
+    const { serverID } = req.body;
+    const info = await findServerInfoByID(serverID);
+    res.status(200).send(info[0]);
+});
+
 recordRoutes.ws('/', function (ws, req) {
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);
-        console.log(data.op + " : " + data.token);
         switch (data.op) {
             case 0:
                 const userMapList = new Array();
