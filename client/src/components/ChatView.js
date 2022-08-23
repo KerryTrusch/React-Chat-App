@@ -1,7 +1,8 @@
 import ChatArea from "./ChatArea/ChatArea";
 import ChannelBar from "./DMSAndChannels/Channels/Channels";
+import Header from "./ServerBar/header";
 import { useState, useEffect } from 'react';
-export default function ChatView({client, channels}) {
+export default function ChatView({client, channels, servers, setServers, setChannels}) {
     const [messageList, setMessageList] = useState([]);
     const [users, setUsers] = useState([]);
     const [serverinfo, setUserinfo] = useState({});
@@ -48,12 +49,10 @@ export default function ChatView({client, channels}) {
         }
         const loadStartingUsers = async (serverID) => {
             const users = await loadUsers({serverID});
-            console.log(users);
             setUsers(users);
         }
         const loadStartingInfo = async (serverID) => {
             const info = await loadServerInfo({serverID});
-            console.log(info);
             setUserinfo(info);
         }
         loadStartingMessages(channelID[3]);
@@ -74,7 +73,7 @@ export default function ChatView({client, channels}) {
     }, [])
 
     return (
-        <div className="flex w-full h-full overflow-hidden">
+        <div className="flex w-full h-full">
             <ChannelBar channels={channels} serverName={serverinfo.name} />
             <ChatArea socket={client} messageList={messageList} setMessageList={setMessageList} channelName={channelName}/>
         </div>

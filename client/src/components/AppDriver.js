@@ -76,10 +76,10 @@ function AppDriver() {
 
     return (
         <div className='flex h-screen w-full'>
-            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels}/>
+            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels} />
             <Routes>
                 <Route exact path="/friends" element={<Home />} />
-                <Route path="/:id/*" element={<ChatView client={client} channels={channels}/>} />
+                <Route path="/:id/*" element={<ChatView client={client} channels={channels} servers={servers} setServers={setServers} setChannels={setChannels}/>} />
             </Routes>
         </div>
     )
