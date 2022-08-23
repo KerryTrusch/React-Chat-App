@@ -122,7 +122,7 @@ const createChannel = async (channelSnowflake, serverSnowflake, name, order) => 
         'INSERT INTO channel (`channelID`, `serverID`, `name`, `pos_order`) VALUES (?, ?, ?, ?)',
         [channelSnowflake, serverSnowflake, name, order]
     );
-}
+}   
 
 const addUserToServer = async (id, serverSnowflake) => {
     const promisePool = connection.promise();
