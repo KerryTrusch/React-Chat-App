@@ -13,17 +13,31 @@ async function getChannels(serverID) {
         .then(data => data.json())
 }
 
-function ServerButton({ src, link, socket, setChannels }) {
-    const [show, setShow] = useState(false)
-    let navigate = useNavigate();
+async function loadMessages(channelID) {
+    return fetch('http://localhost:8000/getmessages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(channelID)
+    })
+        .then(data => data.json());
+}
+
+
+function ServerButton({ src, link, socket, setChannels, setMessageList }) {
+    const [show, setShow] = useState(false);
+    const navigate = useNavigate();
     const handleClick = async e => {
-        e.preventDefault();
         const serverID = link;
         const channels = await getChannels({ serverID });
+        const channelID = channels[0].channelID;
         const obj = { op: 1, newServer: channels[0].channelID, token: JSON.parse(sessionStorage.getItem('token')).token }
         socket.send(JSON.stringify(obj));
         setChannels(channels);
-        navigate(`/channels/${link}/${channels[0].channelID}`);
+        const messages = await loadMessages({channelID});
+        setMessageList(messages);
+        navigate(`${link}/${channelID}`);
     }
     return (
         <div>

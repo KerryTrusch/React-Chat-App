@@ -22,7 +22,6 @@ function CreateServer({ handleClose, show, setServers, servers }) {
             token,
             serverName
         });
-        console.log(res.status);
         if (res.status === 200) {
             handleClose();
         }

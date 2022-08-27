@@ -3,8 +3,7 @@ import ChatMessageBar from "./ChatMessageBar/ChatMessageBar";
 import TextArea from "./TextArea/TextArea";
 import ChatHeader from "./ChatHeader";
 import UserList from "./UserList";
-import { useEffect } from "react";
-function ChatArea({ socket, messageList, setMessageList, name, channelName }) {
+function ChatArea({ socket, messageList, setMessageList, name, channelName, users }) {
 
     const sendMessageThroughSocket = (messageData) => {
         let wsInfo = { op: 3, msgdata: messageData, channelID: window.location.pathname.split('/')[3] };
@@ -59,7 +58,7 @@ function ChatArea({ socket, messageList, setMessageList, name, channelName }) {
                     <TextArea messageList={messageList} />
                     <ChatMessageBar name={channelName} addNewMessage={addNewMessage} />
                 </div>
-                <UserList users_online={1} />
+                <UserList users={users} />
             </div>
         </div>
     )

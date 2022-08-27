@@ -14,26 +14,28 @@ async function getServers(authId) {
         .then(data => data.json())
 }
 
-async function getFriends() {
-    return fetch("http://localhost:8000/getusersservers", {
-        method: 'GET',
-        headers: {
-
-        }
-    })
-}
-
 let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
     const [channels, setChannels] = useState([]);
     const [missed_heartbeats, setMissed_heartbeats] = useState(0);
+    const [messageList, setMessageList] = useState([]);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
         const newServers = await getServers({ token });
         setServers(newServers);
     }
 
+    async function loadMessages(channelID) {
+        return fetch('http://localhost:8000/getmessages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(channelID)
+        })
+            .then(data => data.json());
+    }
 
     useEffect(() => {
         loadServers()
@@ -76,10 +78,10 @@ function AppDriver() {
 
     return (
         <div className='flex h-screen w-full'>
-            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels} />
+            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels} setMessageList={setMessageList} />
             <Routes>
                 <Route exact path="/friends" element={<Home />} />
-                <Route path="/:id/*" element={<ChatView client={client} channels={channels} servers={servers} setServers={setServers} setChannels={setChannels}/>} />
+                <Route path="/:id/*" element={<ChatView client={client} channels={channels} setChannels={setChannels} messageList={messageList} setMessageList={setMessageList} loadMessages={loadMessages}/>} />
             </Routes>
         </div>
     )

@@ -48,98 +48,108 @@ const removeUserFromServerMap = function (server, user) {
 
 const findUser = async (username) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'SELECT * FROM `users` WHERE `uname` = ?',
-        [username]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `users` WHERE `uname` = ?',
+            [username]
+        );
     return row;
 }
 
 const findUserByID = async (id) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'SELECT * FROM `users` WHERE `id` = ?',
-        [id]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `users` WHERE `id` = ?',
+            [id]
+        );
     return row;
 }
 
 const createServer = async (snowflake, name) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'INSERT INTO `server` (`serverID`, `name`) VALUES (?, ?)',
-        [snowflake, name]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'INSERT INTO `server` (`serverID`, `name`) VALUES (?, ?)',
+            [snowflake, name]
+        );
 }
 
 const findServerInfoByID = async (snowflake) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'SELECT * FROM `server` WHERE `serverID` = ?',
-        [snowflake]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `server` WHERE `serverID` = ?',
+            [snowflake]
+        );
     return row;
 }
 
 const findUsersServers = async (id) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'SELECT * FROM `server` WHERE `serverID` IN (SELECT `serverID` FROM `users_in_server` WHERE ? = `userID`)',
-        [id]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `server` WHERE `serverID` IN (SELECT `serverID` FROM `users_in_server` WHERE ? = `userID`)',
+            [id]
+        );
+    return row;
+}
+
+const findUsersInServer = async (snowflake) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `users` WHERE `id` IN (SELECT `userID` FROM `users_in_server` WHERE ? = `serverID`)',
+            [snowflake]
+        );
     return row;
 }
 
 const findAllMessagesInChannel = async (snowflake) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'SELECT * FROM `server_messages` WHERE `channel_id` = ?',
-        [snowflake]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `server_messages` WHERE `channel_id` = ?',
+            [snowflake]
+        );
     return row;
 }
 
 const findChannelsByServerID = async (snowflake) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'SELECT * FROM `channel` WHERE `serverID` = ? ORDER BY `pos_order` asc',
-        [snowflake]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT * FROM `channel` WHERE `serverID` = ? ORDER BY `pos_order` asc',
+            [snowflake]
+        );
     return row;
 }
 
 const createChannel = async (channelSnowflake, serverSnowflake, name, order) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'INSERT INTO channel (`channelID`, `serverID`, `name`, `pos_order`) VALUES (?, ?, ?, ?)',
-        [channelSnowflake, serverSnowflake, name, order]
-    );
-}   
+    const [row, fields] = await
+        promisePool.execute(
+            'INSERT INTO channel (`channelID`, `serverID`, `name`, `pos_order`) VALUES (?, ?, ?, ?)',
+            [channelSnowflake, serverSnowflake, name, order]
+        );
+}
 
 const addUserToServer = async (id, serverSnowflake) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'INSERT INTO `users_in_server` (`userID`, `serverID`) VALUES (?, ?)',
-        [id, serverSnowflake]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'INSERT INTO `users_in_server` (`userID`, `serverID`) VALUES (?, ?)',
+            [id, serverSnowflake]
+        );
 }
 
 const addMessageToChannel = async (channelID, message, serverID, timestamp, src, userID, name) => {
     const promisePool = connection.promise();
-    const [row, fields] = await 
-    promisePool.execute(
-        'INSERT INTO `server_messages` (`channel_id`, `message`, `serverID`, `timestamp`, `src`, `userID`, `name`) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [channelID, message, serverID, timestamp, src, userID, name]
-    );
+    const [row, fields] = await
+        promisePool.execute(
+            'INSERT INTO `server_messages` (`channel_id`, `message`, `serverID`, `timestamp`, `src`, `userID`, `name`) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [channelID, message, serverID, timestamp, src, userID, name]
+        );
 }
 
 recordRoutes.route("/login").post(async (req, res) => {
@@ -151,17 +161,17 @@ recordRoutes.route("/login").post(async (req, res) => {
             // Correct username, password correctly verified
             if (await argon2.verify(info.pword, password)) {
                 const token = jwt.sign({ id: info.id }, JWT_KEY);
-                res.send({token:token});
-            // Correct username, password incorrect
+                res.send({ token: token });
+                // Correct username, password incorrect
             } else {
                 res.sendStatus(401);
             }
-        // Random error
+            // Random error
         } catch (err) {
             console.log(err);
             res.sendStatus(400);
         }
-    // Incorrect username/user does not exist
+        // Incorrect username/user does not exist
     } else {
         res.status(404).send('Not found');
     }
@@ -192,16 +202,26 @@ recordRoutes.route("/register").post(async (req, res) => {
 
 recordRoutes.route("/getservers").post(async (req, res) => {
     const { token } = req.body;
-    const decoded = jwt.verify(token, JWT_KEY);
-    const id = decoded.id;
-    const servers = await findUsersServers(id);
-    res.status(200).send(servers);
+    if (token != undefined) {
+        const decoded = jwt.verify(token, JWT_KEY);
+        const id = decoded.id;
+        const servers = await findUsersServers(id);
+        res.status(200).send(servers);
+    }
 })
 
 recordRoutes.route("/getchannels").post(async (req, res) => {
     const { serverID } = req.body;
-    const channels = await findChannelsByServerID(serverID);
-    res.status(200).send(channels);
+    if (serverID != undefined) {
+        const channels = await findChannelsByServerID(serverID);
+        res.status(200).send(channels);
+    }
+})
+
+recordRoutes.route("/getusers").post(async (req, res) => {
+    const { serverID } = req.body;
+    const users = await findUsersInServer(serverID);
+    res.status(200).send(users);
 })
 
 recordRoutes.route("/createserver").post(async (req, res) => {
@@ -216,6 +236,13 @@ recordRoutes.route("/createserver").post(async (req, res) => {
     res.sendStatus(200);
 })
 
+recordRoutes.route("/createchannel").post(async (req, res) => {
+    const { serverID, channelName, pos } = req.body;
+    const channelSnowflake = Date.now().toString(36);
+    createChannel(channelSnowflake, serverID, channelName, pos);
+    res.sendStatus(200);
+})
+
 recordRoutes.route("/joinserver").post(async (req, res) => {
     const { token, serverID } = req.body;
     const decoded = jwt.verify(token, JWT_KEY);
@@ -227,8 +254,10 @@ recordRoutes.route("/joinserver").post(async (req, res) => {
 
 recordRoutes.route("/getmessages").post(async (req, res) => {
     const { channelID } = req.body;
-    const messages = await findAllMessagesInChannel(channelID);
-    res.status(200).send(messages);
+    if (channelID != undefined) {
+        const messages = await findAllMessagesInChannel(channelID);
+        res.status(200).send(messages);
+    }
 })
 
 recordRoutes.route("/addmessage").post(function (req, res) {
@@ -265,17 +294,17 @@ recordRoutes.ws('/', function (ws, req) {
                 addUserToServerMap(data.newServer, data.token);
                 break;
             case 2:
-            //remove user on disconnect
+                //remove user on disconnect
                 removeUserFromServerMap(usersMap.get(data.token)[1], data.token);
                 usersMap.delete(data.token);
                 break;
             case 3:
-            //send message
+                //send message
                 const userArr = serverMap.get(data.channelID);
                 for (const user of userArr) {
                     console.log(user + " : " + data.msgdata.token);
                     if (user != data.msgdata.token) {
-                        usersMap.get(user)[0].send(JSON.stringify({op: 3, message: data.msgdata}));
+                        usersMap.get(user)[0].send(JSON.stringify({ op: 3, message: data.msgdata }));
                     }
                 }
                 break;

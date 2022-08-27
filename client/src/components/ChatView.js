@@ -1,24 +1,13 @@
 import ChatArea from "./ChatArea/ChatArea";
 import ChannelBar from "./DMSAndChannels/Channels/Channels";
-import Header from "./ServerBar/header";
 import { useState, useEffect } from 'react';
-export default function ChatView({client, channels, servers, setServers, setChannels}) {
-    const [messageList, setMessageList] = useState([]);
+export default function ChatView({client, channels, setChannels, messageList, setMessageList, loadMessages}) {
     const [users, setUsers] = useState([]);
     const [serverinfo, setUserinfo] = useState({});
     const [channelName, setChannelName] = useState("");
     const channelID = window.location.pathname.split('/');
     const channelIDToNameMap = new Map();
-    async function loadMessages(channelID) {
-        return fetch('http://localhost:8000/getmessages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(channelID)
-        })
-            .then(data => data.json());
-    }
+    
 
     async function loadUsers(serverID) {
         return fetch('http://localhost:8000/getusers', {
@@ -74,8 +63,8 @@ export default function ChatView({client, channels, servers, setServers, setChan
 
     return (
         <div className="flex w-full h-full">
-            <ChannelBar channels={channels} serverName={serverinfo.name} />
-            <ChatArea socket={client} messageList={messageList} setMessageList={setMessageList} channelName={channelName}/>
+            <ChannelBar channels={channels} serverName={serverinfo.name} setChannels={setChannels} setMessageList={setMessageList} loadMessages={loadMessages}/>
+            <ChatArea socket={client} messageList={messageList} setMessageList={setMessageList} channelName={channelName} users={users}/>
         </div>
     )
 }
