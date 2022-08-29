@@ -3,7 +3,7 @@ import { faUserPlus, faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import DDInviteModal from './DDInviteModal';
 import CreateChannelModal from './CreateChannelModal';
 import { useEffect, useState } from 'react';
-export default function ChannelDropDown({ setShowDropdown, setChannels, channels }) {
+export default function ChannelDropDown({ setShowDropdown, setChannels, channels, serverID }) {
     const [showInvite, setShowInvite] = useState(false);
     const [showChannel, setShowChannel] = useState(false);
     return (
@@ -33,7 +33,7 @@ export default function ChannelDropDown({ setShowDropdown, setChannels, channels
                 </div>
             </div>
             <div className={`${showInvite ? "visible" : "invisible"}`}>
-                <DDInviteModal setShowInvite={setShowInvite} />
+                <DDInviteModal setShowInvite={setShowInvite} serverID={serverID} />
             </div>
             <div className={`${showChannel ? "visible" : "invisible"}`}>
                 <CreateChannelModal setShowChannel={setShowChannel} setChannels={setChannels} channels={channels}/>

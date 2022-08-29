@@ -24,8 +24,18 @@ async function loadMessages(channelID) {
         .then(data => data.json());
 }
 
+async function loadServerInfo(serverID) {
+    return fetch('http://localhost:8000/getserverinfo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(serverID)
+    })
+        .then(data => data.json());
+}
 
-function ServerButton({ src, link, socket, setChannels, setMessageList }) {
+function ServerButton({ src, link, socket, setChannels, setMessageList, setServerinfo }) {
     const [show, setShow] = useState(false);
     const navigate = useNavigate();
     const handleClick = async e => {
@@ -37,6 +47,8 @@ function ServerButton({ src, link, socket, setChannels, setMessageList }) {
         setChannels(channels);
         const messages = await loadMessages({channelID});
         setMessageList(messages);
+        const inf = await loadServerInfo({link});
+        setServerinfo(inf);
         navigate(`${link}/${channelID}`);
     }
     return (

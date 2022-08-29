@@ -1,13 +1,11 @@
 import ChatArea from "./ChatArea/ChatArea";
 import ChannelBar from "./DMSAndChannels/Channels/Channels";
 import { useState, useEffect } from 'react';
-export default function ChatView({client, channels, setChannels, messageList, setMessageList, loadMessages}) {
+export default function ChatView({client, channels, setChannels, messageList, setMessageList, loadMessages, setServerinfo, serverinfo}) {
     const [users, setUsers] = useState([]);
-    const [serverinfo, setUserinfo] = useState({});
-    const [channelName, setChannelName] = useState("");
+    const name = channels[0] === undefined ? "" : channels[0].name;
+    const [channelName, setChannelName] = useState(name);
     const channelID = window.location.pathname.split('/');
-    const channelIDToNameMap = new Map();
-    
 
     async function loadUsers(serverID) {
         return fetch('http://localhost:8000/getusers', {
@@ -42,7 +40,7 @@ export default function ChatView({client, channels, setChannels, messageList, se
         }
         const loadStartingInfo = async (serverID) => {
             const info = await loadServerInfo({serverID});
-            setUserinfo(info);
+            setServerinfo(info);
         }
         loadStartingMessages(channelID[3]);
         loadStartingUsers(channelID[2]);
@@ -55,15 +53,11 @@ export default function ChatView({client, channels, setChannels, messageList, se
                 }
             }
         }
-        for (let i = 0; i < channels.length; i++) {
-            channelIDToNameMap.set(channels[i].channelID, channels[i].name);
-        }
-        setChannelName(channelIDToNameMap.get(channelID[3]));
     }, [])
 
     return (
         <div className="flex w-full h-full">
-            <ChannelBar channels={channels} serverName={serverinfo.name} setChannels={setChannels} setMessageList={setMessageList} loadMessages={loadMessages}/>
+            <ChannelBar channels={channels} serverName={serverinfo.name} setChannels={setChannels} setChannelName={setChannelName} setMessageList={setMessageList} loadMessages={loadMessages} serverID={serverinfo.serverID}/>
             <ChatArea socket={client} messageList={messageList} setMessageList={setMessageList} channelName={channelName} users={users}/>
         </div>
     )

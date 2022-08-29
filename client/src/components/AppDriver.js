@@ -14,18 +14,36 @@ async function getServers(authId) {
         .then(data => data.json())
 }
 
+async function getServersAndChannels(token) {
+    return fetch("http://localhost:8000/getserverandchannels", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(token)
+    })
+        .then(data => data.json())
+}
+
 let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
     const [channels, setChannels] = useState([]);
     const [missed_heartbeats, setMissed_heartbeats] = useState(0);
+    const [serversAndChannels, setServersAndChannels] = useState([]);
     const [messageList, setMessageList] = useState([]);
+    const [serverinfo, setServerinfo] = useState({});
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
         const newServers = await getServers({ token });
         setServers(newServers);
     }
 
+    const loadServersAndChannels = async () => {
+        const token = JSON.parse(sessionStorage.getItem('token')).token;
+        const items = await getServersAndChannels({ token });
+        setServersAndChannels(items);
+    }
     async function loadMessages(channelID) {
         return fetch('http://localhost:8000/getmessages', {
             method: 'POST',
@@ -38,7 +56,8 @@ function AppDriver() {
     }
 
     useEffect(() => {
-        loadServers()
+        loadServers();
+        loadServersAndChannels();
     }, [])
 
     useEffect(() => {
@@ -78,10 +97,10 @@ function AppDriver() {
 
     return (
         <div className='flex h-screen w-full'>
-            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels} setMessageList={setMessageList} />
+            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels} setMessageList={setMessageList} setServerinfo={setServerinfo} serversAndChannels={serversAndChannels}/>
             <Routes>
                 <Route exact path="/friends" element={<Home />} />
-                <Route path="/:id/*" element={<ChatView client={client} channels={channels} setChannels={setChannels} messageList={messageList} setMessageList={setMessageList} loadMessages={loadMessages}/>} />
+                <Route path="/:id/*" element={<ChatView client={client} channels={channels} setChannels={setChannels} messageList={messageList} setMessageList={setMessageList} loadMessages={loadMessages} serverinfo={serverinfo} setServerinfo={setServerinfo}/>} />
             </Routes>
         </div>
     )

@@ -5,7 +5,7 @@ import ServerButton from './ServerButton';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ReactTooltip from "react-tooltip";
-function Header({ servers, setServers, socket, setChannels, setMessageList }) {
+function Header({ servers, setServers, socket, setChannels, setMessageList, setServerinfo }) {
     const [showmod, setShowmod] = useState();
     const [showDMTip, setShowDMTip] = useState(false);
     const [showModalTip, setShowModalTip] = useState(false);
@@ -22,7 +22,7 @@ function Header({ servers, setServers, socket, setChannels, setMessageList }) {
     if (servers) {
         listOfServers = servers.map((server) =>
             <li className="liForServers z-10" key={server.serverID}>
-                <ServerButton src={"discord-pfp.png"} link={server.serverID} socket={socket} setChannels={setChannels} setMessageList={setMessageList} />
+                <ServerButton src={"discord-pfp.png"} link={server.serverID} socket={socket} setChannels={setChannels} setMessageList={setMessageList} setServerinfo={setServerinfo}/>
             </li>
         );
     } else {

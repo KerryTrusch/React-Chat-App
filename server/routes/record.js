@@ -125,6 +125,16 @@ const findChannelsByServerID = async (snowflake) => {
     return row;
 }
 
+const findChannelsAndServers = async (id) => {
+    const promisePool = connection.promise();
+    const [row, fields] = await
+        promisePool.execute(
+            'SELECT server.*, channel.* FROM server JOIN channel ON server.serverID = channel.serverID JOIN users_in_server ON users_in_server.serverID = server.serverID JOIN users ON users.id = users_in_server.userID WHERE users.id = ?',
+            [id]
+        );
+    return row;
+}
+
 const createChannel = async (channelSnowflake, serverSnowflake, name, order) => {
     const promisePool = connection.promise();
     const [row, fields] = await
@@ -218,37 +228,55 @@ recordRoutes.route("/getchannels").post(async (req, res) => {
     }
 })
 
+recordRoutes.route("/getserverandchannels").post(async (req, res) => {
+    const { token } = req.body;
+    if (token != undefined) {
+        const decoded = jwt.verify(token, JWT_KEY);
+        const id = decoded.id;
+        const serverandchannels = await findChannelsAndServers(id);
+        res.status(200).send(serverandchannels);
+    }
+})
+
 recordRoutes.route("/getusers").post(async (req, res) => {
     const { serverID } = req.body;
-    const users = await findUsersInServer(serverID);
-    res.status(200).send(users);
+    if (serverID != undefined) {
+        const users = await findUsersInServer(serverID);
+        res.status(200).send(users);
+    }
 })
 
 recordRoutes.route("/createserver").post(async (req, res) => {
     const { token, serverName } = req.body;
-    const decoded = jwt.verify(token, JWT_KEY);
-    const id = decoded.id;
-    const serverSnowflake = Date.now().toString(36);
-    createServer(serverSnowflake, serverName);
-    const channelSnowflake = (Date.now() + 1).toString(36);
-    createChannel(channelSnowflake, serverSnowflake, "general", 0);
-    addUserToServer(id, serverSnowflake);
-    res.sendStatus(200);
+    if (token != undefined && serverName != undefined) {
+        const decoded = jwt.verify(token, JWT_KEY);
+        const id = decoded.id;
+        const serverSnowflake = Date.now().toString(36);
+        createServer(serverSnowflake, serverName);
+        const channelSnowflake = (Date.now() + 1).toString(36);
+        createChannel(channelSnowflake, serverSnowflake, "general", 0);
+        addUserToServer(id, serverSnowflake);
+        res.sendStatus(200);
+    }
 })
 
 recordRoutes.route("/createchannel").post(async (req, res) => {
     const { serverID, channelName, pos } = req.body;
-    const channelSnowflake = Date.now().toString(36);
-    createChannel(channelSnowflake, serverID, channelName, pos);
-    res.sendStatus(200);
+    if (serverID != undefined && channelName != undefined && pos != undefined) {
+        const channelSnowflake = Date.now().toString(36);
+        createChannel(channelSnowflake, serverID, channelName, pos);
+        res.sendStatus(200);
+    }
 })
 
 recordRoutes.route("/joinserver").post(async (req, res) => {
     const { token, serverID } = req.body;
-    const decoded = jwt.verify(token, JWT_KEY);
-    const id = decoded.id;
-    addUserToServer(id, serverID);
-    res.sendStatus(200);
+    if (token != undefined && serverID != undefined) {
+        const decoded = jwt.verify(token, JWT_KEY);
+        const id = decoded.id;
+        addUserToServer(id, serverID);
+        res.sendStatus(200);
+    }
 })
 
 
@@ -262,7 +290,7 @@ recordRoutes.route("/getmessages").post(async (req, res) => {
 
 recordRoutes.route("/addmessage").post(function (req, res) {
     const { src, message, timestamp, name, token, serverID, channelID } = req.body;
-    if (token != undefined) {
+    if (token != undefined && message != undefined && timestamp != undefined && name != undefined && token != undefined && serverID != undefined && channelID != undefined) {
         const decoded = jwt.verify(token, JWT_KEY);
         const userID = decoded.id;
         addMessageToChannel(channelID, message, serverID, timestamp, src, userID, name);
@@ -274,8 +302,10 @@ recordRoutes.route("/addmessage").post(function (req, res) {
 
 recordRoutes.route("/getserverinfo").post(async (req, res) => {
     const { serverID } = req.body;
-    const info = await findServerInfoByID(serverID);
-    res.status(200).send(info[0]);
+    if (serverID != undefined) {
+        const info = await findServerInfoByID(serverID);
+        res.status(200).send(info[0]);
+    }
 });
 
 recordRoutes.ws('/', function (ws, req) {
