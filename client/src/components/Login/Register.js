@@ -1,4 +1,3 @@
-import './Register.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -45,20 +44,20 @@ function Register() {
     }
 
     return (
-        <div className="loginWrapper" style={{backgroundImage: `url(miku_background.jpg)`, backgroundSize: 'cover'}}>
-            <div className="loginWrapperCenter">
-                <div className="loginInnerWrapper">
-                    <form className="loginForm" onSubmit={handleSubmit}>
-                        <div className="innerFormLogin">
-                            <h2>Creating an account is simple!</h2>
-                            <h3>Please enter a unique username and password to create an account</h3>
+        <div className="w-full h-screen" style={{backgroundImage: `url(miku_background.jpg)`, backgroundSize: 'cover'}}>
+            <div className="fixed top-[50%] left-[50%] transform-x-[-50%] transform-y-[-50%]">
+                <div className="bg-[#36393f] rounded">
+                    <form className="p-8 text-lg" onSubmit={handleSubmit}>
+                        <div className="flex flex-col justify-center text-center">
+                            <h2 className='text-white font-bold m-0'>Creating an account is simple!</h2>
+                            <h3 className='text-[#72767d] font-bold text-base'>Please enter a unique username and password to create an account</h3>
                             <span id="error_text" style={{display: 'none', color: 'red'}}> Username or password is not of the correct form. They must be between 8-15 characters in length, be alphanumeric and only contain the special characters @*# </span>
-                            <label htmlFor="Username">Enter a username</label>
+                            <label className="text-[#b9bbbe] text-left mb-2" htmlFor="Username">Enter a username</label>
                             <input id="Username" onChange={e => setUsername(e.target.value)} />
-                            <label htmlFor="Password">Enter a password</label>
+                            <label className="text-[#b9bbbe] text-left mb-2" htmlFor="Password">Enter a password</label>
                             <input id="Password" type="password" onChange={e => setPassword(e.target.value)} />
                             <button type="submit" className="loginButton">Create account</button>
-                            <h5>Already have an account? <Link to="/login">Login here</Link></h5>
+                            <h5 className='m-0 mt-1.5 text-left text-[#72767d]'>Already have an account? <Link to="/login">Login here</Link></h5>
                         </div>
                     </form>
                 </div>

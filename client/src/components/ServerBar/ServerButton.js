@@ -1,4 +1,3 @@
-import './ServerButton.css';
 import { Link, useNavigate } from 'react-router-dom';
 import ReactTooltip from "react-tooltip";
 import { useState } from 'react';
@@ -54,7 +53,7 @@ function ServerButton({ src, link, socket, setChannels, setMessageList, setServe
     return (
         <div>
             <Link to={`/channels/${link}`} onClick={handleClick} onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)} data-tip data-for='tip'>
-                <img className="serverButton trans hover:rounded-[15px]" alt='' src={`/${src}`} data-tip data-for='tip' onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}/>
+                <img className="relative h-[46px] h-[46px] block object-cover rounded-[30px] trans hover:rounded-[15px] transition-[border-radius] duration-200" alt='' src={`/${src}`} data-tip data-for='tip' onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}/>
             </Link>
             <div className={`${show ? "block" : "hidden"}`} >
                 <ReactTooltip id='tip' place='right' effect='solid' backgroundColor='#000000'>

@@ -1,4 +1,3 @@
-import './App.css';
 import { createContext } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import React, { useEffect } from 'react';
