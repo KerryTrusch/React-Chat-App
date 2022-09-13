@@ -51,7 +51,7 @@ function ChatArea({ socket, messageList, setMessageList, name, channelName, user
     }
 
     return (
-        <div className="ChatWrapper w-full h-full">
+        <div className="flex flex-col overflow-hidden min-h-0 min-w-0 bg-[#36393f] shrink-1 grow-1 basis-auto w-full h-full">
             <ChatHeader channelName={channelName} />
             <div className="min-w-0 min-h-0 grow-1 shrink-1 basis-auto flex justify-items-stretch items-stretch relative h-full w-full">
                 <div className="flex flex-col min-w-0 min-h-0 grow-1 shrink-1 basis-auto h-full w-full">

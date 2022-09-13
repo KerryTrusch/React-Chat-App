@@ -1,3 +1,4 @@
+const serverless = require('serverless-http');
 const express = require("express");
 const app = module.exports = express();
 const cors = require("cors");
@@ -6,9 +7,9 @@ const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 app.use(require("./routes/record"));
+module.exports.handler = serverless(app);
 
+// app.listen(port, () =>  {
 
-app.listen(port, () =>  {
-
-    console.log(`Server is running on port: ${port}`);
-});
+//     console.log(`Server is running on port: ${port}`);
+// });

@@ -1,4 +1,3 @@
-import "./ChatMessageBar.css";
 import { useState, useContext } from 'react';
 import moment from 'moment';
 import { nameContext } from "../../../App";
@@ -15,9 +14,9 @@ function ChatMessageBar({ name, addNewMessage }) {
         }
     }
     return (
-        <form className="MessageForm" onSubmit={handleSubmit}>
-            <div className="MessageBar">
-                <input className="MessageInput" id="inputbar" onChange={e => { setBody(e.target.value) }} placeholder={"Message @" + name} />
+        <form className="block px-4 shrink-0" onSubmit={handleSubmit}>
+            <div className="mb-6 relative w-full">
+                <input className="px-4 py-2.5 bg-[#40444b] border-none w-full rounded-lg text-white" id="inputbar" onChange={e => { setBody(e.target.value) }} placeholder={"Message @" + name} />
             </div>
         </form>
     )

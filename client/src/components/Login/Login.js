@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 async function loginUser(credentials) {
-    return fetch('http://localhost:8000/login', {
+    return fetch('https://jgpi0srldj.execute-api.us-east-1.amazonaws.com/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -39,7 +39,7 @@ function Login({ setToken, setGlobal }) {
         }
     }
     return (
-        <div className="loginWrapper" style={{backgroundImage: `url(miku_background.jpg)`, backgroundSize: 'cover'}}>
+        <div className="loginWrapper bg-white" >
             <div className="loginWrapperCenter">
                 <div className="loginInnerWrapper">
                     <form className="loginForm" onSubmit={handleSubmit}>
