@@ -1,40 +1,43 @@
 const express = require("express");
 const app = require('../server');
 var expressWs = require('express-ws')(app);
-require("dotenv").config({ path: "./config.env" });
-const JWT_KEY = process.env.PRIVATE_KEY;
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
 // The router will be added as a middleware and will take control of requests starting with path /record.
 const recordRoutes = express.Router();
+const users = require('../db/users');
+const messages = require('../db/messages');
+const server = require('../db/ChatServer');
+const { default: mongoose } = require("mongoose");
 const serverMap = new Map();
 const usersMap = new Map();
-const mysql = require('mysql2');
-const argon2 = require('argon2');
-var jwt = require('jsonwebtoken');
-const connection = mysql.createPool({
-    host: '73.43.191.158',
-    port: 3306,
-    user: 'sammy',
-    password: 'password',
-    database: 'ml_app'
-});
-
+//53-bit hash function courtesy of bryc on stackoverflow: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+const cyrb53 = function (str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+};
 // Make it so that adding a user adds {user.token, ws instance}
-const addUserToServerMap = function (server, user) {
+const addUserToServer = function (server, user) {
     if (!serverMap.has(server)) {
-        let userArr = [user];
-        serverMap.set(server, userArr)
+        serverMap.set(server, [user.token])
     } else {
-        let users = serverMap.get(server)
-        if (!users.includes(user)) {
-            users.push(user)
+        var users = serverMap.get(server)
+        console.log(user);
+        if (!users.includes(user.token)) {
+            users.push(user.token)
             serverMap.set(server, users)
         }
     }
 }
 
-const removeUserFromServerMap = function (server, user) {
+const removeUserFromServer = function (server, user) {
     if (!serverMap.has(server) || !serverMap.get(server).includes(user)) {
         return;
     } else {
@@ -46,302 +49,153 @@ const removeUserFromServerMap = function (server, user) {
     }
 }
 
-const findUser = async (username) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `users` WHERE `uname` = ?',
-            [username]
-        );
-    return row;
-}
-
-const findUserByID = async (id) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `users` WHERE `id` = ?',
-            [id]
-        );
-    return row;
-}
-
-const createServer = async (snowflake, name) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'INSERT INTO `server` (`serverID`, `name`) VALUES (?, ?)',
-            [snowflake, name]
-        );
-}
-
-const findServerInfoByID = async (snowflake) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `server` WHERE `serverID` = ?',
-            [snowflake]
-        );
-    return row;
-}
-
-const findUsersServers = async (id) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `server` WHERE `serverID` IN (SELECT `serverID` FROM `users_in_server` WHERE ? = `userID`)',
-            [id]
-        );
-    return row;
-}
-
-const findUsersInServer = async (snowflake) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `users` WHERE `id` IN (SELECT `userID` FROM `users_in_server` WHERE ? = `serverID`)',
-            [snowflake]
-        );
-    return row;
-}
-
-const findAllMessagesInChannel = async (snowflake) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `server_messages` WHERE `channel_id` = ?',
-            [snowflake]
-        );
-    return row;
-}
-
-const findChannelsByServerID = async (snowflake) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT * FROM `channel` WHERE `serverID` = ? ORDER BY `pos_order` asc',
-            [snowflake]
-        );
-    return row;
-}
-
-const findChannelsAndServers = async (id) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'SELECT server.*, channel.* FROM server JOIN channel ON server.serverID = channel.serverID JOIN users_in_server ON users_in_server.serverID = server.serverID JOIN users ON users.id = users_in_server.userID WHERE users.id = ?',
-            [id]
-        );
-    return row;
-}
-
-const createChannel = async (channelSnowflake, serverSnowflake, name, order) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'INSERT INTO channel (`channelID`, `serverID`, `name`, `pos_order`) VALUES (?, ?, ?, ?)',
-            [channelSnowflake, serverSnowflake, name, order]
-        );
-}
-
-const addUserToServer = async (id, serverSnowflake) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'INSERT INTO `users_in_server` (`userID`, `serverID`) VALUES (?, ?)',
-            [id, serverSnowflake]
-        );
-}
-
-const addMessageToChannel = async (channelID, message, serverID, timestamp, src, userID, name) => {
-    const promisePool = connection.promise();
-    const [row, fields] = await
-        promisePool.execute(
-            'INSERT INTO `server_messages` (`channel_id`, `message`, `serverID`, `timestamp`, `src`, `userID`, `name`) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [channelID, message, serverID, timestamp, src, userID, name]
-        );
-}
-
-recordRoutes.route("/login").post(async (req, res) => {
+recordRoutes.route("/login").post(function (req, res) {
     const { username, password } = req.body;
-    const user = await findUser(username);
-    const info = user[0];
-    if (user.length > 0) {
-        try {
-            // Correct username, password correctly verified
-            if (await argon2.verify(info.pword, password)) {
-                const token = jwt.sign({ id: info.id }, JWT_KEY);
-                res.send({ token: token });
-                // Correct username, password incorrect
-            } else {
-                res.sendStatus(401);
-            }
-            // Random error
-        } catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+    users.findOne({ username: username, password: password }, function (err, result) {
+        if (err) console.log(err);
+        if (result == null) {
+            res.send({ "token": 0 });
+        } else {
+            const token = cyrb53(username + Date.now());
+            result.authid = token;
+            result.save();
+            res.send({ "token": token });
         }
-        // Incorrect username/user does not exist
-    } else {
-        res.status(404).send('Not found');
-    }
+    });
 })
 
-
-recordRoutes.route("/register").post(async (req, res) => {
+// TODO: add a discriminant to everybody's name to make it easier to add friends
+// TODO: separate the logic from getting messages from a server and from a friend. 
+// TODO: users should have a friends array that takes in a kv pair of the username and their messages
+recordRoutes.route("/register").post(function (req, res) {
     const { username, password } = req.body;
-    const user = await findUser(username);
-    if (user.hasOwnProperty('id')) {
-        res.sendStatus(404);
+    let discriminant = 0;
+    let flag = false;
+    if (username.length < 4 || password.length < 4 || username.length > 20 || password.length > 50) {
+        res.send({ "Condition": "INVALID" })
     } else {
-        try {
-            const hash = await argon2.hash(password);
-            connection.execute(
-                'INSERT INTO `users` (`uname`, `pword`) VALUES (?, ?)',
-                [username, hash],
-                function (err, results, fields) {
-                    res.status(200).send('Account successfully created');
+        while (discriminant <= 9999 && !flag) {
+            users.findOne({ username: username, discriminant: discriminant }, function (err, result) {
+                if (result != null) {
+                    discriminant++;
+                } else {
+                    flag = true;
+                    let newUser = new users({ _id: new mongoose.Types.ObjectId(), id: cyrb53(username), authid: 0, username: username, password: password, discriminant: discriminant, servers: [] });
+                    newUser.save();
                 }
-            )
-        } catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            });
+        }
+        if (!flag) {
+            res.send({ "Condition": "COLLISION" });
+        } else {
+            res.send({ "Condition": "SUCCESS" });
         }
     }
 })
 
-recordRoutes.route("/getservers").post(async (req, res) => {
+recordRoutes.route("/getuserservers").post(function (req, res) {
     const { token } = req.body;
-    if (token != undefined) {
-        const decoded = jwt.verify(token, JWT_KEY);
-        const id = decoded.id;
-        const servers = await findUsersServers(id);
-        res.status(200).send(servers);
-    }
+    users.findOne({ authid: token }).populate('servers').exec(function (err, user) {
+        if (err || !user) res.send({ "CONDITION": "FAILURE" });
+        else {
+            res.send({ "CONDITION": "SUCCESS", "SERVERS": user.servers });
+        }
+    })
 })
 
-recordRoutes.route("/getchannels").post(async (req, res) => {
-    const { serverID } = req.body;
-    if (serverID != undefined) {
-        const channels = await findChannelsByServerID(serverID);
-        res.status(200).send(channels);
-    }
+recordRoutes.route("/createserver").post(function (req, res) {
+    const { token, serverName } = req.body
+    users.findOne({ authid: token }, function (err, result) {
+        if (err || !result || !serverName || serverName.length < 1) {
+            res.send({ "CONDITION": token });
+        }
+        else {
+            let serverId = cyrb53(((Date.now() * 2097151).toString()), 1);
+            let newServer = new server({ _id: new mongoose.Types.ObjectId(), id: serverId, src: 'discord-pfp.png', name: serverName, messages: [] });
+            newServer.users.push(result);
+            newServer.save(function (e, r) {
+                result.servers.push(newServer);
+                result.save();
+            });
+            res.send({ "Condition": "SUCCESS", "id": newServer });
+        }
+    })
 })
 
-recordRoutes.route("/getserverandchannels").post(async (req, res) => {
-    const { token } = req.body;
-    if (token != undefined) {
-        const decoded = jwt.verify(token, JWT_KEY);
-        const id = decoded.id;
-        const serverandchannels = await findChannelsAndServers(id);
-        res.status(200).send(serverandchannels);
-    }
+recordRoutes.route("/getservermessages").post(function (req, res) {
+    const { serverId } = req.body;
+    server.findOne({id: serverId}, function(err, res) {
+        res.send({'CONDITION':'SUCCESS', 'messages': res.messages});
+    });
 })
 
-recordRoutes.route("/getusers").post(async (req, res) => {
-    const { serverID } = req.body;
-    if (serverID != undefined) {
-        const users = await findUsersInServer(serverID);
-        res.status(200).send(users);
-    }
+recordRoutes.route("/getdmmessages").post(function (req, res) {
+
 })
-
-recordRoutes.route("/createserver").post(async (req, res) => {
-    const { token, serverName } = req.body;
-    if (token != undefined && serverName != undefined) {
-        const decoded = jwt.verify(token, JWT_KEY);
-        const id = decoded.id;
-        const serverSnowflake = Date.now().toString(36);
-        createServer(serverSnowflake, serverName);
-        const channelSnowflake = (Date.now() + 1).toString(36);
-        createChannel(channelSnowflake, serverSnowflake, "general", 0);
-        addUserToServer(id, serverSnowflake);
-        res.sendStatus(200);
-    }
-})
-
-recordRoutes.route("/createchannel").post(async (req, res) => {
-    const { serverID, channelName, pos } = req.body;
-    if (serverID != undefined && channelName != undefined && pos != undefined) {
-        const channelSnowflake = Date.now().toString(36);
-        createChannel(channelSnowflake, serverID, channelName, pos);
-        res.sendStatus(200);
-    }
-})
-
-recordRoutes.route("/joinserver").post(async (req, res) => {
-    const { token, serverID } = req.body;
-    if (token != undefined && serverID != undefined) {
-        const decoded = jwt.verify(token, JWT_KEY);
-        const id = decoded.id;
-        addUserToServer(id, serverID);
-        res.sendStatus(200);
-    }
-})
-
-
-recordRoutes.route("/getmessages").post(async (req, res) => {
-    const { channelID } = req.body;
-    if (channelID != undefined) {
-        const messages = await findAllMessagesInChannel(channelID);
-        res.status(200).send(messages);
-    }
-})
-
 recordRoutes.route("/addmessage").post(function (req, res) {
-    const { src, message, timestamp, name, token, serverID, channelID } = req.body;
-    if (token != undefined && message != undefined && timestamp != undefined && name != undefined && token != undefined && serverID != undefined && channelID != undefined) {
-        const decoded = jwt.verify(token, JWT_KEY);
-        const userID = decoded.id;
-        addMessageToChannel(channelID, message, serverID, timestamp, src, userID, name);
-        res.sendStatus(200);
-    } else {
-        res.sendStatus(404);
-    }
-});
 
-recordRoutes.route("/getserverinfo").post(async (req, res) => {
-    const { serverID } = req.body;
-    if (serverID != undefined) {
-        const info = await findServerInfoByID(serverID);
-        res.status(200).send(info[0]);
-    }
-});
-
+})
 recordRoutes.ws('/', function (ws, req) {
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);
         switch (data.op) {
             case 0:
-                const userMapList = new Array();
-                userMapList[0] = ws; userMapList[1] = null;
-                usersMap.set(data.token, userMapList);
+                //User joins the chat, initalize them 
+                console.log('joined')
+                addUserToServer(data.server, data.token);
+                let tempArr = new Array();
+                tempArr[0] = ws
+                tempArr[1] = data.server
+                usersMap.set(data.token.token, tempArr);
                 break;
             case 1:
-                if (usersMap.get(data.token)[1] != null) {
-                    removeUserFromServerMap(usersMap.get(data.token)[1], data.token);
-                }
-                addUserToServerMap(data.newServer, data.token);
+                //User changes channel
+                removeUserFromServer(data.oldServer, data.token);
+                addUserToServer(data.newServer, data.token);
+                let newtempArr = new Array();
+                newtempArr[0] = ws
+                newtempArr[1] = data.newServer
+                usersMap.set(data.token.token, newtempArr)
                 break;
             case 2:
                 //remove user on disconnect
-                removeUserFromServerMap(usersMap.get(data.token)[1], data.token);
-                usersMap.delete(data.token);
+                removeUserFromServer(usersMap.get(data.token.token)[1], data.token)
+                usersMap.delete(data.token.token)
                 break;
             case 3:
-                //send message
-                const userArr = serverMap.get(data.channelID);
-                for (const user of userArr) {
-                    console.log(user + " : " + data.msgdata.token);
-                    if (user != data.msgdata.token) {
-                        usersMap.get(user)[0].send(JSON.stringify({ op: 3, message: data.msgdata }));
+                //Add a message
+                users.findOne({ authid: data.token.token }, function (err, res) {
+                    if (err || !res) {
+                        ws.send('error')
+                    } else {
+                        const time = Date.now()
+                        const obj = { time: time, src: 'discord-pfp.png', body: data.body, name: data.name }
+                        usersToEmit = serverMap.get(usersMap.get(data.token.token)[1])
+                        for (const user of usersToEmit) {
+                            if (user != data.token.token) {
+                                usersMap.get(user)[0].send(JSON.stringify(obj))
+                            }
+                        }
+                        let newMessage = new messages({ id: cyrb53(((time * 2097151).toString()), 1), body: data.body, timestamp: time, author: res })
+                        newMessage.save(function (e, r) {
+                            const userServer = usersMap.get(data.token.token)[1]
+                            server.findOne({ id: userServer }, function (err, result) {
+                                if (err || !result) {
+                                    console.log('error finding server')
+                                } else {
+                                    result.messages.push(newMessage);
+                                    result.save();
+                                }
+                            })
+                        })
                     }
-                }
+                })
                 break;
             case 9:
                 ws.send(data.heartbeat)
                 break;
-
+            default:
+                break;
         }
     });
 

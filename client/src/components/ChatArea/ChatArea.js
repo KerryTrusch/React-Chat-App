@@ -1,65 +1,35 @@
+import { useEffect, useState } from "react";
 import "./ChatArea.css";
 import ChatMessageBar from "./ChatMessageBar/ChatMessageBar";
+import ChatMessage from "./TextArea/ChatMessage";
 import TextArea from "./TextArea/TextArea";
-import ChatHeader from "./ChatHeader";
-import UserList from "./UserList";
-function ChatArea({ socket, messageList, setMessageList, name, channelName, users }) {
+function ChatArea({socket, beats, messages, setMessages}) {
+    const token = JSON.parse(sessionStorage.getItem('token'))
+    const [body, setBody] = useState('');
+    useEffect(() => {
+        socket.onmessage = function (evt) {
+            if (evt.data === '--heartbeat--') {
+                beats(0);
+                return;
+            } else {
+                let data = JSON.parse(evt.data)
+                let newMessage = <ChatMessage source={data} />
+                setMessages((prevVal) => [newMessage, ...prevVal])
+            }
+        }
+    }, [])
 
-    const sendMessageThroughSocket = (messageData) => {
-        let wsInfo = { op: 3, msgdata: messageData, channelID: window.location.pathname.split('/')[3] };
-        socket.send(JSON.stringify(wsInfo));
+    const createMessage = () => {
+        var messageData = {op: 3, body: body, token: JSON.parse(sessionStorage.getItem('token'))}
+        socket.send(JSON.stringify(messageData));
+        const newMessageData = {body: body, src: 'discord-pfp.png', time: '11:59PM', name: 'Forodin'}
+        const newMessage = <ChatMessage source={newMessageData} />
+        setMessages((prevVal) => [newMessage, ...prevVal])
     }
-
-    async function addMessageToDB(msginfo) {
-        return fetch('http://localhost:8000/addmessage', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(msginfo)
-        })
-            .then(data => data.json());
-    }
-
-    const addNewMessage = (info) => {
-        setMessageList(oldArray => [...oldArray, info]);
-        const { src, name } = info;
-        const message = info.message;
-        const timestamp = info.timestamp;
-        var url = window.location.pathname.split('/');
-        const serverID = url[2];
-        const channelID = url[3];
-        let token = JSON.parse(sessionStorage.getItem("token")).token;
-        sendMessageThroughSocket({
-            src,
-            message,
-            timestamp,
-            name,
-            token,
-            serverID,
-            channelID
-        });
-        addMessageToDB({
-            src,
-            message,
-            timestamp,
-            name,
-            token,
-            serverID,
-            channelID
-        });
-    }
-
     return (
-        <div className="flex flex-col overflow-hidden min-h-0 min-w-0 bg-[#36393f] shrink-1 grow-1 basis-auto w-full h-full">
-            <ChatHeader channelName={channelName} />
-            <div className="min-w-0 min-h-0 grow-1 shrink-1 basis-auto flex justify-items-stretch items-stretch relative h-full w-full">
-                <div className="flex flex-col min-w-0 min-h-0 grow-1 shrink-1 basis-auto h-full w-full">
-                    <TextArea messageList={messageList} />
-                    <ChatMessageBar name={channelName} addNewMessage={addNewMessage} />
-                </div>
-                <UserList users={users} />
-            </div>
+        <div className="ChatWrapper">
+            <TextArea rawmessages={messages}/>
+            <ChatMessageBar name="Forodin" setBody={setBody} createMessage={createMessage}/>
         </div>
     )
 }
