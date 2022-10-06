@@ -1,46 +1,31 @@
+import './Login.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import "./Login.css";
 async function regUser(credentials) {
-    return fetch('http://localhost:8000/register', {
+    return fetch('http://localhost:5000/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(credentials)
     })
-}
-
-const verifyLogin = (input) => {
-    return /^([a-zA-Z0-9@*#]{8,15})$/.test(input);
+        .then(data => data.json())
 }
 
 function Register() {
-    const [username, setUsername] = useState();
-    const [password, setPassword] = useState();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     let navigate = useNavigate();
     const handleSubmit = async e => {
         e.preventDefault();
-        if (verifyLogin(username) && verifyLogin(password)) {
-            const res = await regUser({
-                username,
-                password
-            });
-            console.log(res);
-            document.getElementById('Password').value = '';
-            document.getElementById('Username').value = '';
-            if (res.status === 200) navigate("/success", { replace: true });
-            else if (res.status === 404) {
-                const text = document.getElementById('error_text');
-                text.style.display = "block";
-                text.innerHTML = "Username is already in use"
-            }
-        } else {
-            const text = document.getElementById('error_text');
-            text.style.display = "block";
-            text.innerHTML = "Username or password is not of the correct form. They must be between 8-15 characters in length, be alphanumeric and only contain the special characters @*#";
-        }
-
+        const res = await regUser({
+            username,
+            password
+        });
+        document.getElementById('Password').value = '';
+        document.getElementById('Username').value = '';
+        if (res.Condition === 'SUCCESS') navigate("/success", { replace: true });
     }
 
     return (
@@ -57,7 +42,7 @@ function Register() {
                             <label className="text-[#b9bbbe] text-left mb-2" htmlFor="Password">Enter a password</label>
                             <input id="Password" type="password" onChange={e => setPassword(e.target.value)} />
                             <button type="submit" className="loginButton">Create account</button>
-                            <h5 className='m-0 mt-1.5 text-left text-[#72767d]'>Already have an account? <Link to="/login">Login here</Link></h5>
+                            <h5>Already have an account? <Link to="/login">Login here</Link></h5>
                         </div>
                     </form>
                 </div>

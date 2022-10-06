@@ -4,14 +4,14 @@ function ChatMessage({ source }) {
     return (
         <div className="messageWrapper">
             <div className="messageInner">
-                <img src={`/${source.src}`} alt=''/>
+                <img src={source.src} onerror="this.src='discord-pfp.png" />
                 <div className="messageNameAndBodyWrapper">
                     <div className="nameAndTime">
                         <span>{source.name}</span>
-                        <small>{source.timestamp}</small>
+                        <small>{source.time}</small>
                     </div>
                     <div className="messageBody">
-                        {source.message}
+                        {source.body}
                     </div>
                 </div>
             </div>

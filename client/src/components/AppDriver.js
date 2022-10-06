@@ -1,10 +1,11 @@
-import Home from './Home';
-import React, { useEffect, useState } from 'react';
+import ServerHeader from './ServerBar/header';
+import Sidebar from './DMSAndChannels/Sidebar';
+import ChatArea from './ChatArea/ChatArea';
+import React, { useEffect, useState, useRef } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import ChatView from './ChatView';
-import Header from './ServerBar/header';
+
 async function getServers(authId) {
-    return fetch("http://localhost:8000/getservers", {
+    return fetch("http://localhost:8000/getuserservers", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -14,57 +15,28 @@ async function getServers(authId) {
         .then(data => data.json())
 }
 
-async function getServersAndChannels(token) {
-    return fetch("http://localhost:8000/getserverandchannels", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(token)
-    })
-        .then(data => data.json())
-}
-
 let client = new WebSocket('ws://localhost:8000')
 function AppDriver() {
     const [servers, setServers] = useState([]);
-    const [channels, setChannels] = useState([]);
     const [missed_heartbeats, setMissed_heartbeats] = useState(0);
-    const [serversAndChannels, setServersAndChannels] = useState([]);
-    const [messageList, setMessageList] = useState([]);
-    const [serverinfo, setServerinfo] = useState({});
+    const [messages, setMessages] = useState([]);
     const loadServers = async () => {
         const token = JSON.parse(sessionStorage.getItem('token')).token
-        const newServers = await getServers({ token });
+        var newServers = await getServers({ token });
+        newServers = newServers.SERVERS;
         setServers(newServers);
     }
 
-    const loadServersAndChannels = async () => {
-        const token = JSON.parse(sessionStorage.getItem('token')).token;
-        const items = await getServersAndChannels({ token });
-        setServersAndChannels(items);
-    }
-    async function loadMessages(channelID) {
-        return fetch('http://localhost:8000/getmessages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(channelID)
-        })
-            .then(data => data.json());
-    }
-
     useEffect(() => {
-        loadServers();
-        loadServersAndChannels();
-    }, [])
+        loadServers()
+    }, [servers])
 
+    
     useEffect(() => {
         client = new WebSocket('ws://localhost:8000')
         var heartbeat_msg = '--heartbeat--', heartbeat_interval = null;
         client.onopen = () => {
-            const obj = { op: 0, token: JSON.parse(sessionStorage.getItem('token')).token }
+            const obj = { op: 0, server: 0, token: JSON.parse(sessionStorage.getItem('token')) }
             client.send(JSON.stringify(obj))
             if (heartbeat_interval == null) {
                 setMissed_heartbeats(0);
@@ -84,25 +56,30 @@ function AppDriver() {
                 }, 5000)
             }
         }
-        client.onmessage = (e) => {
-            if (e.data === heartbeat_msg) {
-                setMissed_heartbeats(0);
-            }
-        }
         client.onclose = function () {
-            const obj = { op: 2, token: JSON.parse(sessionStorage.getItem('token')).token }
+            const obj = { op: 2, token: JSON.parse(sessionStorage.getItem('token')) }
             client.send(JSON.stringify(obj));
         }
     }, [])
 
+    const home = <div style={{ display: 'flex' }}>
+        <ServerHeader servers={servers} setServers={setServers} socket={client} setMessages={setMessages} />
+        <Sidebar />
+        <ChatArea socket={client} beats={setMissed_heartbeats} messages={messages} setMessages={setMessages}/>
+    </div>
+
+
+    const server = <div style={{ display: 'flex' }}>
+        <ServerHeader servers={servers} setServers={setServers} socket={client} setMessages={setMessages} />
+        <Sidebar />
+        <ChatArea socket={client} beats={setMissed_heartbeats} messages={messages} setMessages={setMessages}/>
+    </div>
+
     return (
-        <div className='flex h-screen w-full'>
-            <Header servers={servers} setServers={setServers} socket={client} setChannels={setChannels} setMessageList={setMessageList} setServerinfo={setServerinfo} serversAndChannels={serversAndChannels}/>
-            <Routes>
-                <Route exact path="/friends" element={<Home />} />
-                <Route path="/:id/*" element={<ChatView client={client} channels={channels} setChannels={setChannels} messageList={messageList} setMessageList={setMessageList} loadMessages={loadMessages} serverinfo={serverinfo} setServerinfo={setServerinfo}/>} />
-            </Routes>
-        </div>
+        <Routes>
+            <Route path="/:id" element={server} />
+            <Route exact path="/" element={home} />
+        </Routes>
     )
 }
 
