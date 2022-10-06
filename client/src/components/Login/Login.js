@@ -39,7 +39,7 @@ function Login({ setToken, setGlobal }) {
         }
     }
     return (
-        <div className="loginWrapper bg-white" >
+        <div className="w-screen h-screen bg-blue-400">
             <div className="loginWrapperCenter">
                 <div className="loginInnerWrapper">
                     <form className="loginForm" onSubmit={handleSubmit}>
