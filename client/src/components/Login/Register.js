@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-
+import "./Login.css";
 async function regUser(credentials) {
     return fetch('http://localhost:8000/register', {
         method: 'POST',
@@ -44,7 +44,7 @@ function Register() {
     }
 
     return (
-        <div className="w-full h-screen" style={{backgroundImage: `url(miku_background.jpg)`, backgroundSize: 'cover'}}>
+        <div className="w-full h-screen">
             <div className="fixed top-[50%] left-[50%] transform-x-[-50%] transform-y-[-50%]">
                 <div className="bg-[#36393f] rounded">
                     <form className="p-8 text-lg" onSubmit={handleSubmit}>
